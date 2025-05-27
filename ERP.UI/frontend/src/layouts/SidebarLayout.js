@@ -36,6 +36,7 @@ const menuItems = [
     children: [
       { text: 'Kullanıcılar', path: '/users' },
       { text: 'Roller', path: '/roles' },
+      { text: 'Şubeler', path: '/branchs' },
     ],
   },
   {
@@ -45,7 +46,11 @@ const menuItems = [
   },
 ];
 
-export default function SidebarLayout({ children, darkMode, setDarkMode }) {
+export default function SidebarLayout({
+  children,
+  darkMode = false,
+  setDarkMode = () => {}, // ✅ fallback verildi
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -229,7 +234,14 @@ export default function SidebarLayout({ children, darkMode, setDarkMode }) {
             </Typography>
           </Box>
           <Box>
-            <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
+            <IconButton
+              onClick={() => {
+                if (typeof setDarkMode === 'function') {
+                  setDarkMode(!darkMode);
+                }
+              }}
+              color="inherit"
+            >
               {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
             </IconButton>
             <IconButton color="inherit">

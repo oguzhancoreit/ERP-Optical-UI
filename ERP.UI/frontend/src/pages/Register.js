@@ -5,9 +5,9 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axios from '../services/axios-instance';
+import { useNavigate } from 'react-router-dom';
 import BusinessIcon from '@mui/icons-material/Business';
 import PersonIcon from '@mui/icons-material/Person';
-import { useNavigate } from 'react-router-dom';
 import registerImage from '../assets/logo.png';
 
 function Register() {
@@ -29,25 +29,10 @@ function Register() {
 
   const [captcha, setCaptcha] = useState(generateCaptcha());
 
-  const packages = [
-    { value: 'basic', label: 'Basic', description: '1-3 şube', pricePerBranch: 100 },
-    { value: 'pro', label: 'Pro', description: '4-10 şube', pricePerBranch: 90 },
-    { value: 'enterprise', label: 'Enterprise', description: '10+ şube', pricePerBranch: 75 },
-  ];
-
   const [form, setForm] = useState({
-    firmName: '',
-    taxNumber: '',
-    taxOffice: '',
-    address: '',
-    countryId: '',
-    cityId: '',
-    adminFullName: '',
-    adminEmail: '',
-    adminPassword: '',
-    adminPasswordConfirm: '',
-    package: '',
-    maxBranches: 1,
+    firmName: '', taxNumber: '', taxOffice: '', address: '',
+    countryId: '', cityId: '', adminFullName: '', adminEmail: '',
+    adminPassword: '', adminPasswordConfirm: '',
   });
 
   useEffect(() => {
@@ -66,12 +51,6 @@ function Register() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-  };
-
-  const calculatePrice = () => {
-    const selected = packages.find(p => p.value === form.package);
-    if (!selected) return 0;
-    return form.maxBranches * selected.pricePerBranch;
   };
 
   const handleSubmit = async (e) => {
@@ -105,19 +84,48 @@ function Register() {
     }
   };
 
+  const textFieldSx = {
+    '& .MuiInputBase-root': {
+      backgroundColor: theme.palette.mode === 'light' ? '#ffffffcc' : '#10253d',
+      borderRadius: 2,
+    },
+    '& .MuiInputLabel-root': {
+      fontWeight: 500,
+      color: theme.palette.mode === 'light' ? theme.palette.text.primary : theme.palette.text.secondary,
+    },
+  };
+
   return (
-    <Box sx={{ py: 8, backgroundColor: theme.palette.background.default, minHeight: '100vh' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: theme.palette.mode === 'light'
+          ? 'linear-gradient(145deg, #0d47a1, #1565c0, #1e88e5)'
+          : 'linear-gradient(145deg, #0d47a1, #0b3c84, #1565c0)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        animation: 'fadeIn 1.5s ease-in-out',
+      }}
+    >
       <Container maxWidth="sm">
         <Box textAlign="center" mb={4}>
-          <img src={registerImage} alt="Kayıt Ol" style={{ maxWidth: '120px', width: '100%' }} />
-          <Typography variant="h4" mt={2} fontWeight="bold">Hızlı Kayıt</Typography>
+          <img
+            src={registerImage}
+            alt="Kayıt Ol"
+            style={{ maxWidth: '120px', width: '100%' }}
+          />
+          <Typography variant="h4" mt={2} fontWeight="bold">
+            Hızlı Kayıt
+          </Typography>
           <Typography variant="body1" color="text.secondary">
             Sisteme erişebilmeniz için önce firma ve admin bilgilerini girin.
           </Typography>
         </Box>
 
         <Paper
-          elevation={5}
+          elevation={24}
           sx={{
             p: 4,
             borderRadius: 3,
@@ -128,9 +136,13 @@ function Register() {
             '&:hover': {
               boxShadow: theme.shadows[12],
             },
+            transform: 'scale(0.95)',
+            animation: 'zoomIn 0.8s ease forwards',
           }}
         >
-          <Typography variant="h5" gutterBottom align="center">Firma & Kullanıcı Kaydı</Typography>
+          <Typography variant="h5" gutterBottom align="center">
+            Firma & Kullanıcı Kaydı
+          </Typography>
 
           <Tabs
             value={tabIndex}
@@ -147,16 +159,16 @@ function Register() {
             {tabIndex === 0 && (
               <Grid container spacing={2} direction="column">
                 <Grid item>
-                  <TextField label="Ad Soyad" name="adminFullName" value={form.adminFullName} onChange={handleChange} fullWidth required />
+                  <TextField label="Ad Soyad" name="adminFullName" value={form.adminFullName} onChange={handleChange} fullWidth required sx={textFieldSx} />
                 </Grid>
                 <Grid item>
-                  <TextField label="E-posta" name="adminEmail" value={form.adminEmail} onChange={handleChange} fullWidth required />
+                  <TextField label="E-posta" name="adminEmail" value={form.adminEmail} onChange={handleChange} fullWidth required sx={textFieldSx} />
                 </Grid>
                 <Grid item>
-                  <TextField label="Şifre" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} fullWidth required />
+                  <TextField label="Şifre" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} fullWidth required sx={textFieldSx} />
                 </Grid>
                 <Grid item>
-                  <TextField label="Şifre (Tekrar)" name="adminPasswordConfirm" type="password" value={form.adminPasswordConfirm} onChange={handleChange} fullWidth required />
+                  <TextField label="Şifre (Tekrar)" name="adminPasswordConfirm" type="password" value={form.adminPasswordConfirm} onChange={handleChange} fullWidth required sx={textFieldSx} />
                 </Grid>
               </Grid>
             )}
@@ -164,21 +176,26 @@ function Register() {
             {tabIndex === 1 && (
               <Grid container spacing={2} direction="column">
                 <Grid item>
-                  <TextField label="Firma Adı" name="firmName" value={form.firmName} onChange={handleChange} fullWidth required />
+                  <TextField label="Firma Adı" name="firmName" value={form.firmName} onChange={handleChange} fullWidth required sx={textFieldSx} />
                 </Grid>
                 <Grid item>
-                  <TextField label="Vergi Numarası" name="taxNumber" value={form.taxNumber} onChange={handleChange} fullWidth />
+                  <TextField label="Vergi Numarası" name="taxNumber" value={form.taxNumber} onChange={handleChange} fullWidth sx={textFieldSx} />
                 </Grid>
                 <Grid item>
-                  <TextField label="Vergi Dairesi" name="taxOffice" value={form.taxOffice} onChange={handleChange} fullWidth />
+                  <TextField label="Vergi Dairesi" name="taxOffice" value={form.taxOffice} onChange={handleChange} fullWidth sx={textFieldSx} />
                 </Grid>
                 <Grid item>
-                  <TextField label="Adres" name="address" value={form.address} onChange={handleChange} fullWidth />
+                  <TextField label="Adres" name="address" value={form.address} onChange={handleChange} fullWidth sx={textFieldSx} />
                 </Grid>
                 <Grid item>
                   <FormControl fullWidth required>
                     <InputLabel>Ülke</InputLabel>
-                    <Select name="countryId" value={form.countryId} onChange={handleChange} label="Ülke">
+                    <Select
+                      name="countryId"
+                      value={form.countryId}
+                      onChange={handleChange}
+                      label="Ülke"
+                    >
                       {countries.map((c) => (
                         <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                       ))}
@@ -188,44 +205,18 @@ function Register() {
                 <Grid item>
                   <FormControl fullWidth required>
                     <InputLabel>Şehir</InputLabel>
-                    <Select name="cityId" value={form.cityId} onChange={handleChange} label="Şehir" disabled={!form.countryId}>
+                    <Select
+                      name="cityId"
+                      value={form.cityId}
+                      onChange={handleChange}
+                      label="Şehir"
+                      disabled={!form.countryId}
+                    >
                       {cities.map((c) => (
                         <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-                </Grid>
-
-                <Grid item>
-                  <FormControl fullWidth required>
-                    <InputLabel>Paket Tipi</InputLabel>
-                    <Select name="package" value={form.package} onChange={handleChange} label="Paket Tipi">
-                      {packages.map((p) => (
-                        <MenuItem key={p.value} value={p.value}>
-                          {p.label} - {p.description}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-
-                <Grid item>
-                  <TextField
-                    type="number"
-                    label="Şube Sayısı"
-                    name="maxBranches"
-                    value={form.maxBranches}
-                    onChange={handleChange}
-                    fullWidth
-                    inputProps={{ min: 1 }}
-                    required
-                  />
-                </Grid>
-
-                <Grid item>
-                  <Typography variant="body1" fontWeight="bold">
-                    Toplam Fiyat: ₺{calculatePrice()}
-                  </Typography>
                 </Grid>
               </Grid>
             )}
@@ -239,10 +230,16 @@ function Register() {
                   onChange={(e) => setCaptchaInput(e.target.value)}
                   fullWidth
                   required
+                  sx={textFieldSx}
                 />
               </Grid>
               <Grid item textAlign="center">
-                <Button type="submit" variant="contained" size="large" sx={{ mt: 2, px: 4, py: 1.5 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  sx={{ mt: 2, px: 4, py: 1.5 }}
+                >
                   Kaydı Tamamla
                 </Button>
               </Grid>
@@ -250,6 +247,19 @@ function Register() {
           </form>
         </Paper>
       </Container>
+
+      <style>
+        {`
+          @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+          }
+          @keyframes zoomIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+          }
+        `}
+      </style>
     </Box>
   );
 }
