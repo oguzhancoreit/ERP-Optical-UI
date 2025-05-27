@@ -8,6 +8,7 @@ import axios from '../services/axios-instance';
 import BusinessIcon from '@mui/icons-material/Business';
 import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate } from 'react-router-dom';
+import registerImage from '../assets/logo.png';
 
 function Register() {
   const theme = useTheme();
@@ -28,6 +29,12 @@ function Register() {
 
   const [captcha, setCaptcha] = useState(generateCaptcha());
 
+  const packages = [
+    { value: 'basic', label: 'Basic', description: '1-3 şube', pricePerBranch: 100 },
+    { value: 'pro', label: 'Pro', description: '4-10 şube', pricePerBranch: 90 },
+    { value: 'enterprise', label: 'Enterprise', description: '10+ şube', pricePerBranch: 75 },
+  ];
+
   const [form, setForm] = useState({
     firmName: '',
     taxNumber: '',
@@ -39,6 +46,8 @@ function Register() {
     adminEmail: '',
     adminPassword: '',
     adminPasswordConfirm: '',
+    package: '',
+    maxBranches: 1,
   });
 
   useEffect(() => {
@@ -57,6 +66,12 @@ function Register() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+  };
+
+  const calculatePrice = () => {
+    const selected = packages.find(p => p.value === form.package);
+    if (!selected) return 0;
+    return form.maxBranches * selected.pricePerBranch;
   };
 
   const handleSubmit = async (e) => {
@@ -91,14 +106,16 @@ function Register() {
   };
 
   return (
-    <Box
-      sx={{
-        py: 8,
-        backgroundColor: theme.palette.background.default,
-        minHeight: '100vh',
-      }}
-    >
+    <Box sx={{ py: 8, backgroundColor: theme.palette.background.default, minHeight: '100vh' }}>
       <Container maxWidth="sm">
+        <Box textAlign="center" mb={4}>
+          <img src={registerImage} alt="Kayıt Ol" style={{ maxWidth: '120px', width: '100%' }} />
+          <Typography variant="h4" mt={2} fontWeight="bold">Hızlı Kayıt</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Sisteme erişebilmeniz için önce firma ve admin bilgilerini girin.
+          </Typography>
+        </Box>
+
         <Paper
           elevation={5}
           sx={{
@@ -113,27 +130,14 @@ function Register() {
             },
           }}
         >
-          <Typography variant="h4" gutterBottom align="center">
-            Firma & Kullanıcı Kaydı
-          </Typography>
+          <Typography variant="h5" gutterBottom align="center">Firma & Kullanıcı Kaydı</Typography>
 
           <Tabs
             value={tabIndex}
             onChange={(_, newIndex) => setTabIndex(newIndex)}
             centered
             variant="fullWidth"
-            sx={{
-              mb: 3,
-              '.MuiTab-root': {
-                fontWeight: 'bold',
-              },
-              '.Mui-selected': {
-                color: theme.palette.primary.main,
-              },
-              '.MuiTabs-indicator': {
-                backgroundColor: theme.palette.primary.main,
-              },
-            }}
+            sx={{ mb: 3 }}
           >
             <Tab label="Admin Kullanıcı" icon={<PersonIcon />} iconPosition="start" />
             <Tab label="Firma Bilgileri" icon={<BusinessIcon />} iconPosition="start" />
@@ -174,12 +178,7 @@ function Register() {
                 <Grid item>
                   <FormControl fullWidth required>
                     <InputLabel>Ülke</InputLabel>
-                    <Select
-                      name="countryId"
-                      value={form.countryId}
-                      onChange={handleChange}
-                      label="Ülke"
-                    >
+                    <Select name="countryId" value={form.countryId} onChange={handleChange} label="Ülke">
                       {countries.map((c) => (
                         <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                       ))}
@@ -189,18 +188,44 @@ function Register() {
                 <Grid item>
                   <FormControl fullWidth required>
                     <InputLabel>Şehir</InputLabel>
-                    <Select
-                      name="cityId"
-                      value={form.cityId}
-                      onChange={handleChange}
-                      label="Şehir"
-                      disabled={!form.countryId}
-                    >
+                    <Select name="cityId" value={form.cityId} onChange={handleChange} label="Şehir" disabled={!form.countryId}>
                       {cities.map((c) => (
                         <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
                       ))}
                     </Select>
                   </FormControl>
+                </Grid>
+
+                <Grid item>
+                  <FormControl fullWidth required>
+                    <InputLabel>Paket Tipi</InputLabel>
+                    <Select name="package" value={form.package} onChange={handleChange} label="Paket Tipi">
+                      {packages.map((p) => (
+                        <MenuItem key={p.value} value={p.value}>
+                          {p.label} - {p.description}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item>
+                  <TextField
+                    type="number"
+                    label="Şube Sayısı"
+                    name="maxBranches"
+                    value={form.maxBranches}
+                    onChange={handleChange}
+                    fullWidth
+                    inputProps={{ min: 1 }}
+                    required
+                  />
+                </Grid>
+
+                <Grid item>
+                  <Typography variant="body1" fontWeight="bold">
+                    Toplam Fiyat: ₺{calculatePrice()}
+                  </Typography>
                 </Grid>
               </Grid>
             )}
@@ -217,21 +242,7 @@ function Register() {
                 />
               </Grid>
               <Grid item textAlign="center">
-                <Button
-                  type="submit"
-                  variant="contained"
-                  size="large"
-                  sx={{
-                    mt: 2,
-                    px: 4,
-                    py: 1.5,
-                    backgroundColor: theme.palette.primary.main,
-                    '&:hover': {
-                      backgroundColor: theme.palette.primary.dark || '#155aaf',
-                    },
-                    transition: 'all 0.2s ease-in-out',
-                  }}
-                >
+                <Button type="submit" variant="contained" size="large" sx={{ mt: 2, px: 4, py: 1.5 }}>
                   Kaydı Tamamla
                 </Button>
               </Grid>
