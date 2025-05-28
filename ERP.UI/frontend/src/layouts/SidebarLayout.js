@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import React from 'react';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -13,11 +14,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import BusinessIcon from '@mui/icons-material/Business';
+import SecurityIcon from '@mui/icons-material/Security';
 
 import logo from '../assets/logo.png';
 
@@ -27,21 +29,33 @@ const collapsedDrawerWidth = 72;
 const menuItems = [
   {
     text: 'Dashboard',
-    icon: <DashboardIcon />,
+    icon: <DashboardIcon sx={{ color: '#1976d2' }} />,
     path: '/me',
   },
   {
     text: 'Yönetim',
-    icon: <PeopleIcon />,
+    icon: <PeopleIcon sx={{ color: '#9c27b0' }} />,
     children: [
-      { text: 'Kullanıcılar', path: '/users' },
-      { text: 'Roller', path: '/roles' },
-      { text: 'Şubeler', path: '/branchs' },
+      {
+        text: 'Kullanıcılar',
+        path: '/users',
+        icon: <AccountCircleIcon sx={{ color: '#4caf50', fontSize: 18 }} />,
+      },
+      {
+        text: 'Roller',
+        path: '/roles',
+        icon: <SecurityIcon sx={{ color: '#ff9800', fontSize: 18 }} />,
+      },
+      {
+        text: 'Şubeler',
+        path: '/branchs',
+        icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
+      },
     ],
   },
   {
     text: 'Ayarlar',
-    icon: <SettingsIcon />,
+    icon: <SettingsIcon sx={{ color: '#ff5722' }} />,
     path: '/settings',
   },
 ];
@@ -131,8 +145,8 @@ export default function SidebarLayout({
                               selected={isChildActive}
                               sx={{ pl: drawerOpen ? 6 : 3, py: 1 }}
                             >
-                              <ListItemIcon sx={{ minWidth: 28, color: 'inherit' }}>
-                                <FiberManualRecordIcon sx={{ fontSize: 10 }} />
+                              <ListItemIcon sx={{ minWidth: 28 }}>
+                                {child.icon}
                               </ListItemIcon>
                               {drawerOpen && (
                                 <ListItemText primary={child.text} primaryTypographyProps={{ sx: { color: 'inherit' } }} />
@@ -179,6 +193,7 @@ export default function SidebarLayout({
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          borderRadius: 0,
         }}
       >
         <Toolbar
@@ -211,27 +226,27 @@ export default function SidebarLayout({
       </AppBar>
 
       <Box component="nav" sx={{ width: drawerWidth, flexShrink: 0 }}>
-<Drawer
-  variant="permanent"
-  sx={{
-    display: { xs: 'none', sm: 'block' },
-    '& .MuiDrawer-paper': {
-      width: drawerWidth,
-      transition: 'width 0.3s ease',
-      overflowX: 'hidden',
-      backgroundColor:
-        theme.palette.mode === 'dark'
-          ? theme.palette.background.paper
-          : theme.palette.primary.main,
-      color:
-        theme.palette.mode === 'dark'
-          ? theme.palette.text.primary
-          : theme.palette.primary.contrastText,
-    },
-  }}
-  open
->
-
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              transition: 'width 0.3s ease',
+              overflowX: 'hidden',
+              borderRadius: 0,
+              backgroundColor:
+                theme.palette.mode === 'dark'
+                  ? theme.palette.background.paper
+                  : theme.palette.primary.main,
+              color:
+                theme.palette.mode === 'dark'
+                  ? theme.palette.text.primary
+                  : theme.palette.primary.contrastText,
+            },
+          }}
+          open
+        >
           {drawer}
         </Drawer>
       </Box>

@@ -7,7 +7,7 @@ const getTheme = (mode = 'light') =>
       mode,
       ...(mode === 'light'
         ? {
-            primary: { main: '#1976d2' }, // Material Blue
+            primary: { main: '#0D47A1' }, // Material Blue
             secondary: { main: '#9c27b0' }, // Material Purple
             background: {
               default: '#f5f5f5', // Soft gray
@@ -17,7 +17,7 @@ const getTheme = (mode = 'light') =>
               primary: '#212121', // Strong dark
               secondary: '#616161',
             },
-            divider: '#e0e0e0',
+            divider: '#0D47A1',
           }
         : {
             primary: { main: '#90caf9' },
@@ -30,7 +30,7 @@ const getTheme = (mode = 'light') =>
               primary: '#ffffff',
               secondary: '#b0bec5',
             },
-            divider: '#424242',
+            divider: '#1F1F1F',
           }),
     },
     typography: {
