@@ -1,6 +1,6 @@
 import axios from '../../services/axios-instance';
 
-export function createCrudApi(baseUrl) {
+export function createCrudApi(baseUrl, entityType = '') {
   return {
     getPaged: async (page = 1, pageSize = 10, search = '') => {
       const res = await axios.get(`${baseUrl}/paged`, { params: { page, pageSize, search } });
@@ -21,6 +21,13 @@ export function createCrudApi(baseUrl) {
     remove: async (id) => {
       const res = await axios.delete(`${baseUrl}/${id}`);
       return res.data;
+    },
+    generateCode: async (storeCode = 'DEF') => {
+      if (!entityType) throw new Error("entityType belirtilmedi.");
+      const res = await axios.get(`/code/generate`, {
+        params: { storeCode, entityType }
+      });
+      return res.data.code;
     }
   };
 }

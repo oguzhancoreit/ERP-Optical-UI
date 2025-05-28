@@ -1,4 +1,3 @@
-// Güncellenmiş Material UI 5 Theme (Material Design 3 uyumlu)
 import { createTheme } from '@mui/material/styles';
 
 const getTheme = (mode = 'light') =>
@@ -7,14 +6,14 @@ const getTheme = (mode = 'light') =>
       mode,
       ...(mode === 'light'
         ? {
-            primary: { main: '#0D47A1' }, // Material Blue
-            secondary: { main: '#9c27b0' }, // Material Purple
+            primary: { main: '#0D47A1' },
+            secondary: { main: '#9c27b0' },
             background: {
-              default: '#f5f5f5', // Soft gray
+              default: '#f5f5f5',
               paper: '#ffffff',
             },
             text: {
-              primary: '#212121', // Strong dark
+              primary: '#212121',
               secondary: '#616161',
             },
             divider: '#0D47A1',
@@ -69,6 +68,10 @@ const getTheme = (mode = 'light') =>
         },
       },
       MuiTextField: {
+        defaultProps: {
+          variant: 'outlined',
+          fullWidth: true,
+        },
         styleOverrides: {
           root: {
             '& .MuiInputBase-root': {
@@ -84,6 +87,9 @@ const getTheme = (mode = 'light') =>
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
               borderColor: mode === 'light' ? '#1976d2' : '#90caf9',
               borderWidth: 2,
+            },
+            '& input::placeholder': {
+              opacity: 1,
             },
           },
         },

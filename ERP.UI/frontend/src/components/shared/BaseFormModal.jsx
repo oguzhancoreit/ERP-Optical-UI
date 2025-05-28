@@ -4,7 +4,7 @@ import {
   IconButton, Box, CircularProgress, Snackbar, Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useFormik } from 'formik';
 import { motion } from 'framer-motion';
 
@@ -23,10 +23,13 @@ export default function BaseFormModal({
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  const initialValues = fields.reduce((acc, field) => {
-    acc[field.name] = '';
-    return acc;
-  }, {});
+  // initialValues artık dinamik, initialData'ya göre hesaplanıyor
+  const initialValues = useMemo(() => {
+    return fields.reduce((acc, field) => {
+      acc[field.name] = initialData?.[field.name] ?? '';
+      return acc;
+    }, {});
+  }, [initialData, fields]);
 
   const formik = useFormik({
     initialValues,
@@ -48,16 +51,6 @@ export default function BaseFormModal({
     },
     enableReinitialize: true,
   });
-
-  useEffect(() => {
-    if (open) {
-      if (initialData) {
-        formik.setValues(initialData);
-      } else {
-        formik.resetForm();
-      }
-    }
-  }, [open, initialData]);
 
   const handleSnackbarClose = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -107,7 +100,6 @@ export default function BaseFormModal({
                     key={field.name}
                     label={field.label}
                     name={field.name}
-                    fullWidth
                     required={field.required}
                     multiline={field.multiline}
                     rows={field.rows}
