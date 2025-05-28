@@ -1,10 +1,12 @@
 import {
   Dialog, DialogContent, DialogActions,
-  TextField, Button, Grid, DialogTitle
+  TextField, Button, Grid, DialogTitle, useTheme
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 export default function BranchFormModal({ open, onClose, onSave, initialData }) {
+  const theme = useTheme();
+
   const [form, setForm] = useState({
     name: '',
     code: '',
@@ -31,8 +33,15 @@ export default function BranchFormModal({ open, onClose, onSave, initialData }) 
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{initialData ? 'Şubeyi Güncelle' : 'Yeni Şube Ekle'}</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" PaperProps={{
+      sx: {
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary
+      }
+    }}>
+      <DialogTitle sx={{ fontWeight: 'bold', borderBottom: `1px solid ${theme.palette.divider}` }}>
+        {initialData ? 'Şubeyi Güncelle' : 'Yeni Şube Ekle'}
+      </DialogTitle>
 
       <DialogContent>
         <Grid container spacing={2} direction="column">
@@ -44,6 +53,8 @@ export default function BranchFormModal({ open, onClose, onSave, initialData }) 
               onChange={handleChange}
               fullWidth
               required
+              variant="outlined"
+              InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
             />
           </Grid>
           <Grid item>
@@ -54,6 +65,8 @@ export default function BranchFormModal({ open, onClose, onSave, initialData }) 
               onChange={handleChange}
               fullWidth
               required
+              variant="outlined"
+              InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
             />
           </Grid>
           <Grid item>
@@ -65,16 +78,18 @@ export default function BranchFormModal({ open, onClose, onSave, initialData }) 
               fullWidth
               multiline
               rows={2}
+              variant="outlined"
+              InputLabelProps={{ style: { color: theme.palette.text.secondary } }}
             />
           </Grid>
         </Grid>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ borderTop: `1px solid ${theme.palette.divider}` }}>
         <Button onClick={onClose} color="inherit">
           İptal
         </Button>
-        <Button onClick={handleSubmit} variant="contained">
+        <Button onClick={handleSubmit} variant="contained" color="primary">
           Kaydet
         </Button>
       </DialogActions>

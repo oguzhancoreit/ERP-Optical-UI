@@ -1,7 +1,7 @@
+// Gerekli importlar...
 import {
   Box, Button, Typography, Stack, useTheme, IconButton,
-  Tooltip, Paper, TextField, Chip, InputAdornment,
-  CircularProgress
+  Tooltip, Paper, TextField, Chip, InputAdornment, Snackbar
 } from '@mui/material';
 import { useEffect, useState, useCallback } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
@@ -21,22 +21,22 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 
-function CustomNoRowsOverlay() {
+function CustomNoRowsOverlay({ onAdd }) {
   return (
     <Stack
       direction="column"
       alignItems="center"
       justifyContent="center"
-      spacing={1}
+      spacing={2}
       sx={{ mt: 3, color: 'text.secondary', height: '100%' }}
     >
       <SentimentDissatisfiedIcon sx={{ fontSize: 40 }} />
       <Typography variant="subtitle1" fontWeight="bold">
         Kayıt bulunamadı
       </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Yeni kayıt eklemek için "Yeni Şube" butonunu kullanabilirsiniz.
-      </Typography>
+      <Button variant="outlined" startIcon={<AddIcon />} onClick={onAdd}>
+        Yeni Şube Ekle
+      </Button>
     </Stack>
   );
 }
@@ -52,6 +52,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fetchBranches = useCallback(async () => {
     setLoading(true);
@@ -78,6 +79,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
         await updateBranch(selectedBranch.id, formData);
       } else {
         await createBranch(formData);
+        setPage(0);
       }
       setModalOpen(false);
       setSelectedBranch(null);
@@ -90,6 +92,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
   const handleDelete = async (id) => {
     if (!window.confirm('Bu şubeyi silmek istiyor musunuz?')) return;
     await deleteBranch(id);
+    setSnackbarOpen(true);
     fetchBranches();
   };
 
@@ -126,18 +129,14 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
 
-        const formatted = `${year}-${month}-${day} ${hours}:${minutes}`;
-
         return (
           <Chip
-            label={formatted}
+            label={`${year}-${month}-${day} ${hours}:${minutes}`}
             size="small"
-            color={theme.palette.mode === 'dark' ? 'default' : 'primary'}
             sx={{
               fontWeight: 'bold',
-              backgroundColor:
-                theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-              color: theme.palette.mode === 'dark' ? '#eee' : undefined,
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
             }}
           />
         );
@@ -149,43 +148,22 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <Stack
-          direction="row"
-          spacing={1}
-          alignItems="center"      
-          justifyContent="center"  
-          sx={{ height: '100%', width: '100%' }}
-        >
+        <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
           <Tooltip title="Düzenle">
-            <IconButton
-              color="primary"
-              onClick={() => {
-                setSelectedBranch(params.row);
-                setModalOpen(true);
-              }}
-              sx={{ width: 32, height: 32, boxShadow: (theme) => theme.shadows[2] }}
-              size="small"
-            >
+            <IconButton color="primary" onClick={() => {
+              setSelectedBranch(params.row);
+              setModalOpen(true);
+            }}>
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Kopyala">
-            <IconButton
-              color="success"
-              onClick={() => handleCopy(params.row)}
-              sx={{ width: 32, height: 32, boxShadow: (theme) => theme.shadows[2] }}
-              size="small"
-            >
+            <IconButton color="success" onClick={() => handleCopy(params.row)}>
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Tooltip>
           <Tooltip title="Sil">
-            <IconButton
-              color="error"
-              onClick={() => handleDelete(params.row.id)}
-              sx={{ width: 32, height: 32, boxShadow: (theme) => theme.shadows[2] }}
-              size="small"
-            >
+            <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -196,7 +174,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
 
   return (
     <SidebarLayout darkMode={darkMode} setDarkMode={setDarkMode}>
-      <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', backgroundColor: theme.palette.background.default }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h5" fontWeight="bold">Şubeler</Typography>
           <Button
@@ -222,22 +200,18 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
             startAdornment: <SearchIcon sx={{ mr: 1 }} />,            endAdornment: search && (
-              <IconButton
-                size="small"
-                onClick={() => setSearch('')}
-                aria-label="Temizle"
-              >
+              <IconButton size="small" onClick={() => setSearch('')}>
                 <ClearIcon />
               </IconButton>
             ),
           }}
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, backgroundColor: theme.palette.background.paper, borderRadius: 1 }}
         />
 
         <Box sx={{ flex: 1 }}>
-          <Paper elevation={2} sx={{ height: '100%' }}>
+          <Paper elevation={2} sx={{ height: '100%', backgroundColor: theme.palette.background.paper }}>
             {branches.length === 0 && !loading ? (
-              <CustomNoRowsOverlay />
+              <CustomNoRowsOverlay onAdd={() => setModalOpen(true)} />
             ) : (
               <DataGrid
                 rows={branches}
@@ -255,17 +229,11 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
                 getRowId={(row) => row.id}
                 disableRowSelectionOnClick
                 sx={{
-                  height: '100%',
                   border: 'none',
                   '& .MuiDataGrid-columnHeaders': {
-                    background:
-                      theme.palette.mode === 'dark'
-                        ? 'linear-gradient(90deg, #27334d, #1c2535)'
-                        : 'linear-gradient(90deg, #e3f2fd, #bbdefb)',
-                    fontWeight: 'bold',
-                    fontSize: '1.1rem',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    backgroundColor: theme.palette.background.paper,
+                    color: theme.palette.text.primary,
+                    fontWeight: 'bold'
                   },
                   '& .MuiDataGrid-row:hover': {
                     backgroundColor: theme.palette.action.hover,
@@ -287,6 +255,13 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
           initialData={selectedBranch}
           disableBackdropClick
           disableEscapeKeyDown
+        />
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
+          onClose={() => setSnackbarOpen(false)}
+          message="Şube başarıyla silindi"
         />
       </Box>
     </SidebarLayout>
