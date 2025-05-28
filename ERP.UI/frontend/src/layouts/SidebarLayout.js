@@ -21,7 +21,7 @@ import Brightness7Icon from '@mui/icons-material/Brightness7';
 import BusinessIcon from '@mui/icons-material/Business';
 import SecurityIcon from '@mui/icons-material/Security';
 
-import logo from '../assets/logo.png';
+import logo from '../assets/gozluk.png';
 
 const expandedDrawerWidth = 240;
 const collapsedDrawerWidth = 72;
@@ -94,7 +94,7 @@ export default function SidebarLayout({
           alt="Logo"
           onClick={() => navigate('/')}
           sx={{
-            height: 32,
+            height: 45,
             mr: drawerOpen ? 1 : 0,
             transition: 'margin 0.3s',
             cursor: 'pointer',
@@ -102,7 +102,7 @@ export default function SidebarLayout({
         />
         {drawerOpen && (
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-            CoreOpticalApp
+            Core Optical
           </Typography>
         )}
       </Toolbar>
