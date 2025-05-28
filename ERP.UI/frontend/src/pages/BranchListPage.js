@@ -1,49 +1,10 @@
-// Gerekli importlar...
-import {
-  Box, Button, Typography, Stack, useTheme, IconButton,
-  Tooltip, Paper, TextField, Chip, InputAdornment, Snackbar
-} from '@mui/material';
 import { useEffect, useState, useCallback } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-
-import {
-  getBranchesPaged, createBranch, updateBranch, deleteBranch
-} from '../api/branch-api';
-
 import SidebarLayout from '../layouts/SidebarLayout';
 import BranchFormModal from '../components/BranchFormModal';
-
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
-
-function CustomNoRowsOverlay({ onAdd }) {
-  return (
-    <Stack
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      spacing={2}
-      sx={{ mt: 3, color: 'text.secondary', height: '100%' }}
-    >
-      <SentimentDissatisfiedIcon sx={{ fontSize: 40 }} />
-      <Typography variant="subtitle1" fontWeight="bold">
-        Kayıt bulunamadı
-      </Typography>
-      <Button variant="outlined" startIcon={<AddIcon />} onClick={onAdd}>
-        Yeni Şube Ekle
-      </Button>
-    </Stack>
-  );
-}
+import { getBranchesPaged, createBranch, updateBranch, deleteBranch } from '../api/branch-api';
+import BaseListPage from '../components/shared/BaseListPage';
 
 export default function BranchListPage({ darkMode, setDarkMode }) {
-  const theme = useTheme();
-
   const [branches, setBranches] = useState([]);
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -52,7 +13,6 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const fetchBranches = useCallback(async () => {
     setLoading(true);
@@ -90,9 +50,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Bu şubeyi silmek istiyor musunuz?')) return;
     await deleteBranch(id);
-    setSnackbarOpen(true);
     fetchBranches();
   };
 
@@ -107,9 +65,14 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
     setModalOpen(true);
   };
 
+  const handleEdit = (branch) => {
+    setSelectedBranch(branch);
+    setModalOpen(true);
+  };
+
   const columns = [
-    { field: 'name', headerName: 'Ad', flex: 1 },
     { field: 'code', headerName: 'Kod', flex: 1 },
+    { field: 'name', headerName: 'Ad', flex: 1 },
     { field: 'address', headerName: 'Adres', flex: 2 },
     {
       field: 'createdAt',
@@ -129,141 +92,45 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
 
-        return (
-          <Chip
-            label={`${year}-${month}-${day} ${hours}:${minutes}`}
-            size="small"
-            sx={{
-              fontWeight: 'bold',
-              backgroundColor: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-            }}
-          />
-        );
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
       },
-    },
-    {
-      field: 'actions',
-      headerName: 'İşlemler',
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
-          <Tooltip title="Düzenle">
-            <IconButton color="primary" onClick={() => {
-              setSelectedBranch(params.row);
-              setModalOpen(true);
-            }}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Kopyala">
-            <IconButton color="success" onClick={() => handleCopy(params.row)}>
-              <ContentCopyIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Sil">
-            <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
     }
   ];
 
   return (
     <SidebarLayout darkMode={darkMode} setDarkMode={setDarkMode}>
-      <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', backgroundColor: theme.palette.background.default }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h5" fontWeight="bold">Şubeler</Typography>
-          <Button
-            startIcon={<AddIcon />}
-            variant="contained"
-            size="large"
-            color="primary"
-            onClick={() => {
-              setSelectedBranch(null);
-              setModalOpen(true);
-            }}
-          >
-            Yeni Şube
-          </Button>
-        </Stack>
+      <BaseListPage
+        title="Şubeler"
+        columns={columns}
+        rows={branches}
+        rowCount={rowCount}
+        loading={loading}
+        onAdd={() => {
+          setSelectedBranch(null);
+          setModalOpen(true);
+        }}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onCopy={handleCopy}
+        search={search}
+        onSearch={setSearch}
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
 
-        <TextField
-          placeholder="Şube ara..."
-          variant="outlined"
-          size="small"
-          fullWidth
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: <SearchIcon sx={{ mr: 1 }} />,            endAdornment: search && (
-              <IconButton size="small" onClick={() => setSearch('')}>
-                <ClearIcon />
-              </IconButton>
-            ),
-          }}
-          sx={{ mb: 2, backgroundColor: theme.palette.background.paper, borderRadius: 1 }}
-        />
-
-        <Box sx={{ flex: 1 }}>
-          <Paper elevation={2} sx={{ height: '100%', backgroundColor: theme.palette.background.paper }}>
-            {branches.length === 0 && !loading ? (
-              <CustomNoRowsOverlay onAdd={() => setModalOpen(true)} />
-            ) : (
-              <DataGrid
-                rows={branches}
-                columns={columns}
-                rowCount={rowCount}
-                loading={loading}
-                paginationMode="server"
-                page={page}
-                pageSize={pageSize}
-                onPageChange={(newPage) => setPage(newPage)}
-                onPageSizeChange={(newSize) => {
-                  setPageSize(newSize);
-                  setPage(0);
-                }}
-                getRowId={(row) => row.id}
-                disableRowSelectionOnClick
-                sx={{
-                  border: 'none',
-                  '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: theme.palette.background.paper,
-                    color: theme.palette.text.primary,
-                    fontWeight: 'bold'
-                  },
-                  '& .MuiDataGrid-row:hover': {
-                    backgroundColor: theme.palette.action.hover,
-                    cursor: 'pointer',
-                  },
-                }}
-              />
-            )}
-          </Paper>
-        </Box>
-
-        <BranchFormModal
-          open={modalOpen}
-          onClose={() => {
-            setModalOpen(false);
-            setSelectedBranch(null);
-          }}
-          onSave={handleSave}
-          initialData={selectedBranch}
-          disableBackdropClick
-          disableEscapeKeyDown
-        />
-
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={() => setSnackbarOpen(false)}
-          message="Şube başarıyla silindi"
-        />
-      </Box>
+      <BranchFormModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setSelectedBranch(null);
+        }}
+        onSave={handleSave}
+        initialData={selectedBranch}
+        disableBackdropClick
+        disableEscapeKeyDown
+      />
     </SidebarLayout>
   );
 }
