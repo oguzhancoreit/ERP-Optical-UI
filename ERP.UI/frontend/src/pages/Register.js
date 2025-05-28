@@ -1,7 +1,7 @@
 import {
   Box, Button, Container, Grid, TextField, Typography,
   MenuItem, Select, InputLabel, FormControl, Divider, Paper,
-  Tabs, Tab, useTheme
+  Tabs, Tab
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axios from '../services/axios-instance';
@@ -11,7 +11,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import registerImage from '../assets/logo.png';
 
 function Register() {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const [countries, setCountries] = useState([]);
@@ -84,29 +83,15 @@ function Register() {
     }
   };
 
-  const textFieldSx = {
-    '& .MuiInputBase-root': {
-      backgroundColor: theme.palette.mode === 'light' ? '#ffffffcc' : '#10253d',
-      borderRadius: 2,
-    },
-    '& .MuiInputLabel-root': {
-      fontWeight: 500,
-      color: theme.palette.mode === 'light' ? theme.palette.text.primary : theme.palette.text.secondary,
-    },
-  };
-
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: theme.palette.mode === 'light'
-          ? 'linear-gradient(145deg, #0d47a1, #1565c0, #1e88e5)'
-          : 'linear-gradient(145deg, #0d47a1, #0b3c84, #1565c0)',
+        bgcolor: 'background.default',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         px: 2,
-        animation: 'fadeIn 1.5s ease-in-out',
       }}
     >
       <Container maxWidth="sm">
@@ -124,22 +109,7 @@ function Register() {
           </Typography>
         </Box>
 
-        <Paper
-          elevation={24}
-          sx={{
-            p: 4,
-            borderRadius: 3,
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            boxShadow: theme.shadows[8],
-            transition: 'all 0.3s ease-in-out',
-            '&:hover': {
-              boxShadow: theme.shadows[12],
-            },
-            transform: 'scale(0.95)',
-            animation: 'zoomIn 0.8s ease forwards',
-          }}
-        >
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
           <Typography variant="h5" gutterBottom align="center">
             Firma & Kullanıcı Kaydı
           </Typography>
@@ -156,73 +126,129 @@ function Register() {
           </Tabs>
 
           <form onSubmit={handleSubmit}>
-            {tabIndex === 0 && (
-              <Grid container spacing={2} direction="column">
-                <Grid item>
-                  <TextField label="Ad Soyad" name="adminFullName" value={form.adminFullName} onChange={handleChange} fullWidth required sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <TextField label="E-posta" name="adminEmail" value={form.adminEmail} onChange={handleChange} fullWidth required sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <TextField label="Şifre" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} fullWidth required sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <TextField label="Şifre (Tekrar)" name="adminPasswordConfirm" type="password" value={form.adminPasswordConfirm} onChange={handleChange} fullWidth required sx={textFieldSx} />
-                </Grid>
-              </Grid>
-            )}
-
-            {tabIndex === 1 && (
-              <Grid container spacing={2} direction="column">
-                <Grid item>
-                  <TextField label="Firma Adı" name="firmName" value={form.firmName} onChange={handleChange} fullWidth required sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <TextField label="Vergi Numarası" name="taxNumber" value={form.taxNumber} onChange={handleChange} fullWidth sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <TextField label="Vergi Dairesi" name="taxOffice" value={form.taxOffice} onChange={handleChange} fullWidth sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <TextField label="Adres" name="address" value={form.address} onChange={handleChange} fullWidth sx={textFieldSx} />
-                </Grid>
-                <Grid item>
-                  <FormControl fullWidth required>
-                    <InputLabel>Ülke</InputLabel>
-                    <Select
-                      name="countryId"
-                      value={form.countryId}
-                      onChange={handleChange}
-                      label="Ülke"
-                    >
-                      {countries.map((c) => (
-                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item>
-                  <FormControl fullWidth required>
-                    <InputLabel>Şehir</InputLabel>
-                    <Select
-                      name="cityId"
-                      value={form.cityId}
-                      onChange={handleChange}
-                      label="Şehir"
-                      disabled={!form.countryId}
-                    >
-                      {cities.map((c) => (
-                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            )}
-
-            <Divider sx={{ my: 4 }} />
             <Grid container spacing={2} direction="column">
+              {tabIndex === 0 && (
+                <>
+                  <Grid item>
+                    <TextField
+                      label="Ad Soyad"
+                      name="adminFullName"
+                      value={form.adminFullName}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label="E-posta"
+                      name="adminEmail"
+                      value={form.adminEmail}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label="Şifre"
+                      name="adminPassword"
+                      type="password"
+                      value={form.adminPassword}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label="Şifre (Tekrar)"
+                      name="adminPasswordConfirm"
+                      type="password"
+                      value={form.adminPasswordConfirm}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {tabIndex === 1 && (
+                <>
+                  <Grid item>
+                    <TextField
+                      label="Firma Adı"
+                      name="firmName"
+                      value={form.firmName}
+                      onChange={handleChange}
+                      fullWidth
+                      required
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label="Vergi Numarası"
+                      name="taxNumber"
+                      value={form.taxNumber}
+                      onChange={handleChange}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label="Vergi Dairesi"
+                      name="taxOffice"
+                      value={form.taxOffice}
+                      onChange={handleChange}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      label="Adres"
+                      name="address"
+                      value={form.address}
+                      onChange={handleChange}
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item>
+                    <FormControl fullWidth required>
+                      <InputLabel>Ülke</InputLabel>
+                      <Select
+                        name="countryId"
+                        value={form.countryId}
+                        onChange={handleChange}
+                        label="Ülke"
+                      >
+                        {countries.map((c) => (
+                          <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item>
+                    <FormControl fullWidth required>
+                      <InputLabel>Şehir</InputLabel>
+                      <Select
+                        name="cityId"
+                        value={form.cityId}
+                        onChange={handleChange}
+                        label="Şehir"
+                        disabled={!form.countryId}
+                      >
+                        {cities.map((c) => (
+                          <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
+
+              <Divider sx={{ my: 4 }} />
+
               <Grid item>
                 <TextField
                   label={`Lütfen sonucu girin: ${captcha.question} = ?`}
@@ -230,7 +256,6 @@ function Register() {
                   onChange={(e) => setCaptchaInput(e.target.value)}
                   fullWidth
                   required
-                  sx={textFieldSx}
                 />
               </Grid>
               <Grid item textAlign="center">
@@ -238,7 +263,6 @@ function Register() {
                   type="submit"
                   variant="contained"
                   size="large"
-                  sx={{ mt: 2, px: 4, py: 1.5 }}
                 >
                   Kaydı Tamamla
                 </Button>
@@ -247,19 +271,6 @@ function Register() {
           </form>
         </Paper>
       </Container>
-
-      <style>
-        {`
-          @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-          }
-          @keyframes zoomIn {
-            0% { transform: scale(0.95); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-          }
-        `}
-      </style>
     </Box>
   );
 }

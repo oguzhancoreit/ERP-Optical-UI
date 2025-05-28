@@ -49,7 +49,7 @@ const menuItems = [
 export default function SidebarLayout({
   children,
   darkMode = false,
-  setDarkMode = () => {}, // ✅ fallback verildi
+  setDarkMode = () => {},
 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,8 +72,6 @@ export default function SidebarLayout({
           display: 'flex',
           alignItems: 'center',
           justifyContent: drawerOpen ? 'flex-start' : 'center',
-          backgroundColor: theme.palette.background.paper,
-          borderBottom: '1px solid rgba(0,0,0,0.08)',
         }}
       >
         <Box
@@ -89,10 +87,7 @@ export default function SidebarLayout({
           }}
         />
         {drawerOpen && (
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}
-          >
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             CoreOpticalApp
           </Typography>
         )}
@@ -110,26 +105,14 @@ export default function SidebarLayout({
                       item.children ? toggleSubMenu(item.text) : navigate(item.path)
                     }
                     selected={isActive}
-                    sx={{
-                      '&.Mui-selected': {
-                        backgroundColor: theme.palette.action.selected,
-                        color: theme.palette.primary.contrastText,
-                        '& .MuiListItemIcon-root': {
-                          color: theme.palette.primary.contrastText,
-                        },
-                      },
-                      '&:hover': {
-                        backgroundColor: theme.palette.action.hover,
-                      },
-                      color: theme.palette.text.primary,
-                      px: 3,
-                      transition: 'all 0.25s ease-in-out',
-                    }}
+                    sx={{ px: 3 }}
                   >
-                    <ListItemIcon sx={{ color: theme.palette.text.secondary, minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center' }}>
+                    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
                       {item.icon}
                     </ListItemIcon>
-                    {drawerOpen && <ListItemText primary={item.text} />}
+                    {drawerOpen && (
+                      <ListItemText primary={item.text} primaryTypographyProps={{ sx: { color: 'inherit' } }} />
+                    )}
                     {item.children && drawerOpen && (openMenus[item.text] ? <ExpandLess /> : <ExpandMore />)}
                   </ListItemButton>
                 </Tooltip>
@@ -146,26 +129,14 @@ export default function SidebarLayout({
                             <ListItemButton
                               onClick={() => navigate(child.path)}
                               selected={isChildActive}
-                              sx={{
-                                pl: drawerOpen ? 6 : 3,
-                                py: 1,
-                                fontSize: '0.875rem',
-                                color: isChildActive
-                                  ? theme.palette.primary.contrastText
-                                  : theme.palette.text.secondary,
-                                bgcolor: isChildActive
-                                  ? theme.palette.primary.main
-                                  : 'inherit',
-                                '&:hover': {
-                                  bgcolor: theme.palette.action.hover,
-                                },
-                                transition: 'all 0.2s ease-in-out',
-                              }}
+                              sx={{ pl: drawerOpen ? 6 : 3, py: 1 }}
                             >
-                              <ListItemIcon sx={{ minWidth: 28 }}>
+                              <ListItemIcon sx={{ minWidth: 28, color: 'inherit' }}>
                                 <FiberManualRecordIcon sx={{ fontSize: 10 }} />
                               </ListItemIcon>
-                              {drawerOpen && <ListItemText primary={child.text} />}
+                              {drawerOpen && (
+                                <ListItemText primary={child.text} primaryTypographyProps={{ sx: { color: 'inherit' } }} />
+                              )}
                             </ListItemButton>
                           </Tooltip>
                         </ListItem>
@@ -185,15 +156,12 @@ export default function SidebarLayout({
                 localStorage.clear();
                 navigate('/');
               }}
-              sx={{
-                px: 3,
-                '&:hover': { bgcolor: theme.palette.action.hover },
-              }}
+              sx={{ px: 3 }}
             >
-              <ListItemIcon sx={{ color: theme.palette.error.main, minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center' }}>
+              <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
                 <LogoutIcon />
               </ListItemIcon>
-              {drawerOpen && <ListItemText primary="Çıkış" />}
+              {drawerOpen && <ListItemText primary="Çıkış" primaryTypographyProps={{ sx: { color: 'inherit' } }} />}
             </ListItemButton>
           </Tooltip>
         </ListItem>
@@ -207,15 +175,10 @@ export default function SidebarLayout({
 
       <AppBar
         position="fixed"
-        elevation={0}
+        elevation={1}
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          backgroundColor: theme.palette.background.paper,
-          color: theme.palette.text.primary,
-          boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-          borderBottom: '1px solid rgba(0,0,0,0.05)',
-          transition: 'width 0.3s ease, margin 0.3s ease',
         }}
       >
         <Toolbar
@@ -226,7 +189,7 @@ export default function SidebarLayout({
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton onClick={() => setDrawerOpen(!drawerOpen)} sx={{ mr: 2 }}>
+            <IconButton onClick={() => setDrawerOpen(!drawerOpen)} sx={{ mr: 2 }} color="inherit">
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap>
@@ -234,14 +197,7 @@ export default function SidebarLayout({
             </Typography>
           </Box>
           <Box>
-            <IconButton
-              onClick={() => {
-                if (typeof setDarkMode === 'function') {
-                  setDarkMode(!darkMode);
-                }
-              }}
-              color="inherit"
-            >
+            <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
               {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
             </IconButton>
             <IconButton color="inherit">
@@ -255,22 +211,27 @@ export default function SidebarLayout({
       </AppBar>
 
       <Box component="nav" sx={{ width: drawerWidth, flexShrink: 0 }}>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              width: drawerWidth,
-              backgroundColor: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-              boxShadow: '4px 0 12px rgba(0,0,0,0.08)',
-              borderRight: 'none',
-              transition: 'width 0.3s ease',
-              overflowX: 'hidden',
-            },
-          }}
-          open
-        >
+<Drawer
+  variant="permanent"
+  sx={{
+    display: { xs: 'none', sm: 'block' },
+    '& .MuiDrawer-paper': {
+      width: drawerWidth,
+      transition: 'width 0.3s ease',
+      overflowX: 'hidden',
+      backgroundColor:
+        theme.palette.mode === 'dark'
+          ? theme.palette.background.paper
+          : theme.palette.primary.main,
+      color:
+        theme.palette.mode === 'dark'
+          ? theme.palette.text.primary
+          : theme.palette.primary.contrastText,
+    },
+  }}
+  open
+>
+
           {drawer}
         </Drawer>
       </Box>
@@ -280,10 +241,8 @@ export default function SidebarLayout({
         sx={{
           flexGrow: 1,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          backgroundColor: theme.palette.background.default,
           minHeight: '100vh',
           p: 3,
-          transition: 'margin 0.3s ease, width 0.3s ease',
         }}
       >
         <Toolbar />

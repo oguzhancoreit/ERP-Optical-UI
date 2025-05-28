@@ -1,6 +1,6 @@
 import {
-  Box, Typography, useTheme, Paper, Grid, Avatar, CircularProgress, Chip,
-  Tooltip, IconButton, Button
+  Box, Typography, Paper, Grid, Avatar, CircularProgress, Chip,
+  IconButton, Button
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import axios from '../services/axios-instance';
@@ -16,7 +16,6 @@ import UpgradeIcon from '@mui/icons-material/Upgrade';
 
 function Me({ darkMode, setDarkMode }) {
   const [user, setUser] = useState(null);
-  const theme = useTheme();
 
   useEffect(() => {
     axios.get('/auth/me')
@@ -36,9 +35,8 @@ function Me({ darkMode, setDarkMode }) {
     ? Math.max(0, Math.ceil((new Date(user.packageValidUntil) - new Date()) / (1000 * 60 * 60 * 24)))
     : null;
 
-  const totalDays = 1000;
   const progressValue = remainingDays
-    ? Math.min(100, Math.floor((remainingDays / totalDays) * 100))
+    ? Math.min(100, Math.floor((remainingDays / 1000) * 100))
     : 0;
 
   const statusColor =
@@ -46,103 +44,46 @@ function Me({ darkMode, setDarkMode }) {
     remainingDays < 7 ? 'warning' :
     'success';
 
-  const gradientCard = theme.palette.mode === 'dark'
-    ? 'linear-gradient(135deg, #1a2a3f, #22334d)'
-    : 'linear-gradient(135deg, #f0f4ff, #e2eaff)';
-
   return (
     <SidebarLayout darkMode={darkMode} setDarkMode={setDarkMode}>
-      <Box sx={{ p: 4, backgroundColor: theme.palette.background.default }}>
+      <Box sx={{ p: 4 }}>
 
         {/* Kullanıcı Kartı */}
-        <Paper
-          sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 2,
-            background: gradientCard,
-            boxShadow: theme.shadows[3],
-          }}
-        >
+        <Paper sx={{ p: 3, mb: 4, borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: theme.palette.primary.main, color: '#fff', width: 56, height: 56 }}>
+            <Avatar>
               <WorkspacePremiumIcon />
             </Avatar>
             <Box>
-              <Typography variant="h6" fontWeight="bold">
-                {user.fullName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {user.email}
-              </Typography>
+              <Typography variant="h6">{user.fullName}</Typography>
+              <Typography variant="body2" color="text.secondary">{user.email}</Typography>
             </Box>
           </Box>
-          <IconButton sx={{ color: theme.palette.text.secondary }}>
+          <IconButton>
             <SettingsIcon />
           </IconButton>
         </Paper>
 
         {/* Bilgi Kartları */}
         <Grid container spacing={3}>
-          <InfoCard
-            icon={<BusinessIcon />}
-            label="Firma"
-            value={user.firmName}
-            iconColor={theme.palette.info.main}
-          />
-          <InfoCard
-            icon={<StorageIcon />}
-            label="Veritabanı"
-            value={user.dbName}
-            iconColor={theme.palette.secondary.main}
-          />
-          <InfoCard
-            icon={<WorkspacePremiumIcon />}
-            label="Paket"
-            value={packageLabels[user.package]}
-            iconColor={theme.palette.warning.main}
-          >
+          <InfoCard icon={<BusinessIcon />} label="Firma" value={user.firmName} />
+          <InfoCard icon={<StorageIcon />} label="Veritabanı" value={user.dbName} />
+          <InfoCard icon={<WorkspacePremiumIcon />} label="Paket" value={packageLabels[user.package]}>
             <Chip label={user.package.toUpperCase()} color="primary" size="small" />
           </InfoCard>
-          <InfoCard
-            icon={<GroupWorkIcon />}
-            label="Maksimum Şube"
-            value={user.maxBranches}
-            iconColor={theme.palette.success.main}
-          />
+          <InfoCard icon={<GroupWorkIcon />} label="Maksimum Şube" value={user.maxBranches} />
+
           {user.packageValidUntil && (
-            <InfoCard
-              icon={<CalendarMonthIcon />}
-              label="Paket Bitiş"
-              iconColor={theme.palette.error.main}
-            >
+            <InfoCard icon={<CalendarMonthIcon />} label="Paket Bitiş">
               <Typography>
                 {new Date(user.packageValidUntil).toLocaleDateString('tr-TR')}
               </Typography>
             </InfoCard>
           )}
 
-          {/* Kalan Gün Kartı */}
           {remainingDays !== null && (
             <Grid item xs={12} sm={6}>
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: 3,
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  gap: 3,
-                  backgroundColor: theme.palette.background.paper,
-                  border: `1px solid ${theme.palette.divider}`,
-                  boxShadow: theme.shadows[2],
-                }}
-              >
+              <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 3 }}>
                 <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                   <CircularProgress
                     variant="determinate"
@@ -160,7 +101,7 @@ function Me({ darkMode, setDarkMode }) {
                       position: 'absolute',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
+                      justifyContent: 'center'
                     }}
                   >
                     <Typography variant="subtitle1" fontWeight="bold">
@@ -168,9 +109,10 @@ function Me({ darkMode, setDarkMode }) {
                     </Typography>
                   </Box>
                 </Box>
-
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Kalan Gün</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Kalan Gün
+                  </Typography>
                   <Typography variant="h6" fontWeight="bold">
                     {remainingDays <= 0 ? 'Süre Doldu' : `${remainingDays} gün`}
                   </Typography>
@@ -191,49 +133,31 @@ function Me({ darkMode, setDarkMode }) {
             </Grid>
           )}
 
-          {/* Geliştirilmiş Yükseltme Kartı */}
+          {/* Yükseltme Kartı */}
           <Grid item xs={12} sm={6}>
             <Paper
               sx={{
                 p: 4,
-                borderRadius: 3,
-                height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
                 alignItems: 'center',
-                background: theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, #263245, #1a2538)'
-                  : 'linear-gradient(135deg, #e3f2fd, #ffffff)',
-                border: `1px dashed ${theme.palette.primary.main}`,
-                boxShadow: theme.shadows[2],
                 textAlign: 'center',
+                gap: 2,
+                border: '1px dashed',
+                borderColor: 'primary.main',
               }}
             >
-              <Avatar
-                sx={{
-                  bgcolor: theme.palette.primary.main,
-                  color: '#fff',
-                  width: 56,
-                  height: 56,
-                  mb: 1,
-                }}
-              >
+              <Avatar>
                 <WorkspacePremiumIcon />
               </Avatar>
-
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
+              <Typography variant="h6">
                 İhtiyacınız olan özellikler burada mı bitiyor?
               </Typography>
-
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Üst paketlerle daha fazla şube ve kullanıcıya erişin. İleri düzey raporlamalar ve destek sizleri bekliyor.
+              <Typography variant="body2" color="text.secondary">
+                Üst paketlerle daha fazla şube ve kullanıcıya erişin. Gelişmiş raporlamalar ve destek sizi bekliyor.
               </Typography>
-
               <Button
                 variant="contained"
-                color="primary"
-                size="medium"
                 endIcon={<UpgradeIcon />}
                 onClick={() => alert('Paket yükseltme sayfasına yönlendirilecek.')}
               >
@@ -247,34 +171,16 @@ function Me({ darkMode, setDarkMode }) {
   );
 }
 
-function InfoCard({ icon, label, value, children, iconColor }) {
-  const theme = useTheme();
+function InfoCard({ icon, label, value, children }) {
   return (
     <Grid item xs={12} sm={6}>
-      <Paper
-        sx={{
-          p: 3,
-          borderRadius: 3,
-          height: '100%',
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center',
-          backgroundColor: theme.palette.background.paper,
-          boxShadow: theme.shadows[1],
-        }}
-      >
-        <Avatar sx={{ bgcolor: iconColor || theme.palette.primary.light, color: '#fff' }}>
-          {icon}
-        </Avatar>
+      <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Avatar>{icon}</Avatar>
         <Box>
           <Typography variant="caption" color="text.secondary">{label}</Typography>
           {value !== undefined ? (
-            <Typography variant="body1" fontWeight={500}>
-              {value}
-            </Typography>
-          ) : (
-            children
-          )}
+            <Typography variant="body1" fontWeight={500}>{value}</Typography>
+          ) : children}
         </Box>
       </Paper>
     </Grid>
