@@ -1,6 +1,6 @@
 import {
   Box, Stack, Typography, TextField, IconButton, Tooltip, Button,
-  Paper, useTheme
+  Paper, Chip, useTheme
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useMemo, useState } from 'react';
@@ -44,7 +44,20 @@ export default function BaseListPage({
 }) {
   const theme = useTheme();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+
+  const handleDeleteRequest = (id) => {
+    setSelectedId(id);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (onDelete && selectedId !== null) {
+      onDelete(selectedId);
+    }
+    setConfirmOpen(false);
+    setSelectedId(null);
+  };
 
   const extendedColumns = useMemo(() => {
     return [
@@ -72,10 +85,7 @@ export default function BaseListPage({
             )}
             {onDelete && (
               <Tooltip title="Sil">
-                <IconButton color="error" onClick={() => {
-                  setDeleteTargetId(params.row.id);
-                  setConfirmOpen(true);
-                }}>
+                <IconButton color="error" onClick={() => handleDeleteRequest(params.row.id)}>
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
@@ -85,14 +95,6 @@ export default function BaseListPage({
       }
     ];
   }, [columns, onEdit, onCopy, onDelete]);
-
-  const handleConfirmDelete = () => {
-    if (onDelete && deleteTargetId !== null) {
-      onDelete(deleteTargetId);
-    }
-    setConfirmOpen(false);
-    setDeleteTargetId(null);
-  };
 
   return (
     <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', backgroundColor: theme.palette.background.default }}>
@@ -157,10 +159,10 @@ export default function BaseListPage({
 
       <ConfirmDialog
         open={confirmOpen}
-        onCancel={() => setConfirmOpen(false)}
-        onConfirm={handleConfirmDelete}
         title="Silme Onayı"
         message="Bu kaydı silmek istediğinize emin misiniz?"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmOpen(false)}
       />
     </Box>
   );

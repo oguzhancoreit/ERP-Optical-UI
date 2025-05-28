@@ -1,4 +1,5 @@
 // src/App.js
+
 import { useEffect, useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,22 +10,58 @@ import Welcome from './pages/Welcome';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Me from './pages/Me';
-import BranchListPage from './pages/BranchListPage'; // ✅ Şube sayfası eklendi
+import BranchListPage from './pages/BranchListPage';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
-  // localStorage'dan tema okuma
+  // Sayfa ilk yüklendiğinde localStorage'dan tema bilgisi alınır
   useEffect(() => {
     const stored = localStorage.getItem('theme');
     if (stored === 'dark') setDarkMode(true);
   }, []);
 
-  // tema değişince localStorage'a yaz
+  // Tema değiştiğinde localStorage'a yazılır
   useEffect(() => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
+  // 🚫 Klavye kısayolları ve sağ tıklama engelleme
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ctrl+S engelleme (sayfa kaydetmeyi önler)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        console.log('CTRL+S engellendi.');
+      }
+
+      // Ctrl+P engelleme (yazdırmayı önler)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        console.log('CTRL+P engellendi.');
+      }
+
+      // Diğer tuş kombinasyonları buraya eklenebilir
+    };
+
+    const handleContextMenu = (e) => {
+      // Sağ tıklama menüsünü engelle
+      e.preventDefault();
+      console.log('Sağ tıklama engellendi.');
+    };
+
+    // Event listener'ları ekle
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('contextmenu', handleContextMenu);
+
+    // Temizlik: bileşen unmount olduğunda event listener'ları kaldır
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, []);
+
+  // Tema nesnesini oluştur
   const theme = getTheme(darkMode ? 'dark' : 'light');
 
   return (
