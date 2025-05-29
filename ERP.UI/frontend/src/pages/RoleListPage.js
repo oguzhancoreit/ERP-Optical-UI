@@ -1,12 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import SidebarLayout from '../layouts/SidebarLayout';
 import RoleFormModal from '../components/RoleFormModal';
-import {
-  getRolesPaged,
-  createRole,
-  updateRole,
-  deleteRole,
-} from '../api/role-api';
+import { getRolesPaged, createRole, updateRole, deleteRole } from '../api/role-api';
 import BaseListPage from '../components/shared/BaseListPage';
 
 export default function RoleListPage({ darkMode, setDarkMode }) {
@@ -19,6 +14,7 @@ export default function RoleListPage({ darkMode, setDarkMode }) {
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // Listeyi çek
   const fetchRoles = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,6 +34,7 @@ export default function RoleListPage({ darkMode, setDarkMode }) {
     return () => clearTimeout(delay);
   }, [fetchRoles]);
 
+  // Ekle/güncelle
   const handleSave = async (formData) => {
     try {
       if (selectedRole?.id) {
@@ -50,20 +47,17 @@ export default function RoleListPage({ darkMode, setDarkMode }) {
       setSelectedRole(null);
       fetchRoles();
     } catch {
-      alert('Kayıt işlemi başarısız.');
+      alert('İşlem sırasında hata oluştu.');
     }
   };
 
+  // Sil
   const handleDelete = async (id) => {
     await deleteRole(id);
     fetchRoles();
   };
 
-  const handleEdit = (role) => {
-    setSelectedRole(role);
-    setModalOpen(true);
-  };
-
+  // Kopyala
   const handleCopy = (role) => {
     const copy = {
       ...role,
@@ -74,16 +68,34 @@ export default function RoleListPage({ darkMode, setDarkMode }) {
     setModalOpen(true);
   };
 
+  // Düzenle
+  const handleEdit = (role) => {
+    setSelectedRole(role);
+    setModalOpen(true);
+  };
+
+  // Kolonlar
   const columns = [
-    { field: 'name', headerName: 'Rol Adı', flex: 1.5 },
+    { field: 'name', headerName: 'Ad', flex: 1 },
     {
       field: 'createdAt',
       headerName: 'Oluşturulma',
       flex: 1.2,
+      sortable: true,
       renderCell: (params) => {
-        const d = new Date(params.row.createdAt);
-        if (isNaN(d.getTime())) return '-';
-        return d.toLocaleString();
+        const rawDate = params.row?.createdAt || params.row?.CreatedAt;
+        if (!rawDate) return '-';
+
+        const d = new Date(rawDate);
+        if (isNaN(d.getTime())) return 'Invalid Date';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
       },
     },
   ];
@@ -119,8 +131,6 @@ export default function RoleListPage({ darkMode, setDarkMode }) {
         }}
         onSave={handleSave}
         initialData={selectedRole}
-        disableBackdropClick
-        disableEscapeKeyDown
       />
     </SidebarLayout>
   );

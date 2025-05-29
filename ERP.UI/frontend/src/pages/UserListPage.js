@@ -19,6 +19,7 @@ export default function UserListPage({ darkMode, setDarkMode }) {
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // Kullanıcıları çek
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,13 +39,14 @@ export default function UserListPage({ darkMode, setDarkMode }) {
     return () => clearTimeout(delayDebounce);
   }, [fetchUsers]);
 
+  // Ekle/güncelle
   const handleSave = async (formData) => {
     try {
       if (selectedUser?.id) {
         await updateUser(selectedUser.id, formData);
       } else {
         await createUser(formData);
-        setPage(0);
+        setPage(0); // yeni kullanıcıda ilk sayfaya dön
       }
       setModalOpen(false);
       setSelectedUser(null);
@@ -54,11 +56,13 @@ export default function UserListPage({ darkMode, setDarkMode }) {
     }
   };
 
+  // Sil
   const handleDelete = async (id) => {
     await deleteUser(id);
     fetchUsers();
   };
 
+  // Kopyala
   const handleCopy = (user) => {
     const copy = {
       ...user,
@@ -70,11 +74,13 @@ export default function UserListPage({ darkMode, setDarkMode }) {
     setModalOpen(true);
   };
 
+  // Düzenle
   const handleEdit = (user) => {
     setSelectedUser(user);
     setModalOpen(true);
   };
 
+  // Kolonlar
   const columns = [
     { field: 'fullName', headerName: 'Ad Soyad', flex: 1 },
     { field: 'email', headerName: 'E-posta', flex: 1.5 },
@@ -82,18 +88,18 @@ export default function UserListPage({ darkMode, setDarkMode }) {
       field: 'roles',
       headerName: 'Roller',
       flex: 1.2,
-      valueGetter: (params) => {
+      renderCell: (params) => {
         const roles = params?.row?.roles;
-        return Array.isArray(roles) ? roles.join(', ') : '-';
+        return Array.isArray(roles) && roles.length > 0 ? roles.join(', ') : '-';
       },
     },
     {
       field: 'branches',
       headerName: 'Şubeler',
       flex: 1.5,
-      valueGetter: (params) => {
+      renderCell: (params) => {
         const branches = params?.row?.branches;
-        return Array.isArray(branches) ? branches.join(', ') : '-';
+        return Array.isArray(branches) && branches.length > 0 ? branches.join(', ') : '-';
       },
     },
     {
@@ -145,8 +151,6 @@ export default function UserListPage({ darkMode, setDarkMode }) {
         }}
         onSave={handleSave}
         initialData={selectedUser}
-        disableBackdropClick
-        disableEscapeKeyDown
       />
     </SidebarLayout>
   );

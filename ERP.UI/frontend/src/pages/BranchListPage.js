@@ -14,6 +14,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // Veri çekme fonksiyonu
   const fetchBranches = useCallback(async () => {
     setLoading(true);
     try {
@@ -21,6 +22,7 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
       setBranches(res.items || []);
       setRowCount(res.totalCount || 0);
     } catch {
+      // Burada merkezi bir Snackbar kullanıyorsan alert kaldırılabilir.
       alert('Şubeler yüklenemedi.');
     }
     setLoading(false);
@@ -33,18 +35,20 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
     return () => clearTimeout(delayDebounce);
   }, [fetchBranches]);
 
+  // Kaydetme (yeni & güncelle)
   const handleSave = async (formData) => {
     try {
       if (selectedBranch?.id) {
         await updateBranch(selectedBranch.id, formData);
       } else {
         await createBranch(formData);
-        setPage(0);
+        setPage(0); // yeni kayıt varsa başa dön
       }
       setModalOpen(false);
       setSelectedBranch(null);
       fetchBranches();
     } catch {
+      // Merkezî hata mesajın varsa burayı temiz bırakabilirsin.
       alert('İşlem sırasında hata oluştu.');
     }
   };
@@ -128,8 +132,6 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
         }}
         onSave={handleSave}
         initialData={selectedBranch}
-        disableBackdropClick
-        disableEscapeKeyDown
       />
     </SidebarLayout>
   );

@@ -11,7 +11,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Me from './pages/Me';
 import BranchListPage from './pages/BranchListPage';
-import UserListPage from './pages/UserListPage'; // 🔽 Ekledik
+import UserListPage from './pages/UserListPage';
 import RoleListPage from './pages/RoleListPage';
 
 function App() {
@@ -20,7 +20,9 @@ function App() {
   // Sayfa ilk yüklendiğinde localStorage'dan tema bilgisi alınır
   useEffect(() => {
     const stored = localStorage.getItem('theme');
-    if (stored === 'dark') setDarkMode(true);
+    if (stored === 'dark') {
+      setDarkMode(true);
+    }
   }, []);
 
   // Tema değiştiğinde localStorage'a yazılır
@@ -36,14 +38,11 @@ function App() {
         e.preventDefault();
         console.log('CTRL+S engellendi.');
       }
-
       // Ctrl+P engelleme (yazdırmayı önler)
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
         e.preventDefault();
         console.log('CTRL+P engellendi.');
       }
-
-      // Diğer tuş kombinasyonları buraya eklenebilir
     };
 
     const handleContextMenu = (e) => {
@@ -52,11 +51,9 @@ function App() {
       console.log('Sağ tıklama engellendi.');
     };
 
-    // Event listener'ları ekle
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', handleContextMenu);
 
-    // Temizlik: bileşen unmount olduğunda event listener'ları kaldır
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', handleContextMenu);
@@ -80,18 +77,31 @@ function App() {
           />
           <Route
             path="/branchs"
-            element={<BranchListPage darkMode={darkMode} setDarkMode={setDarkMode} />}
+            element={
+              <BranchListPage
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+              />
+            }
           />
-           <Route
-             path="/users"
-               element={<UserListPage darkMode={darkMode} setDarkMode={setDarkMode} />} // ✅ Yeni rota
-  />
-
-<Route
-  path="/roles"
-  element={<RoleListPage darkMode={darkMode} setDarkMode={setDarkMode} />}
-/>
-
+          <Route
+            path="/users"
+            element={
+              <UserListPage
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+              />
+            }
+          />
+          <Route
+            path="/roles"
+            element={
+              <RoleListPage
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+              />
+            }
+          />
         </Routes>
       </Router>
     </ThemeProvider>

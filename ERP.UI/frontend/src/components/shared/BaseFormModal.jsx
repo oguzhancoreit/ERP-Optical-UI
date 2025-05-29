@@ -8,11 +8,11 @@ import {
   IconButton,
   Box,
   CircularProgress,
-  Snackbar,
-  Alert,
   MenuItem,
   Checkbox,
-  ListItemText
+  ListItemText,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useMemo, useEffect } from 'react';
@@ -29,12 +29,18 @@ export default function BaseFormModal({
   initialData,
   title,
   fields,
-  validationSchema
+  validationSchema,
+  loading: externalLoading,
+  successMessage = "Kayıt başarıyla tamamlandı.",
+  errorMessage = "Kayıt sırasında bir hata oluştu."
 }) {
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [optionsMap, setOptionsMap] = useState({});
 
+  // Snackbar state burada!
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Her açılışta ve field-list değiştiğinde sıfırdan initialValues oluştur.
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {
       acc[field.name] = initialData?.[field.name] ?? (field.type === 'select-multi' ? [] : '');
@@ -42,6 +48,7 @@ export default function BaseFormModal({
     }, {});
   }, [initialData, fields]);
 
+  // Formik ile form state ve otomatik reset
   const formik = useFormik({
     initialValues,
     validationSchema,
@@ -54,17 +61,29 @@ export default function BaseFormModal({
       );
       try {
         await onSave(cleanValues);
-        setSnackbar({ open: true, message: `${title} başarıyla kaydedildi.`, severity: 'success' });
+        setSnackbar({ open: true, message: successMessage, severity: 'success' });
         onClose();
       } catch (error) {
-        setSnackbar({ open: true, message: 'Kayıt sırasında bir hata oluştu.', severity: 'error' });
+        let msg = errorMessage;
+        if (typeof error === "string") msg = error;
+        else if (error?.response?.data?.message) msg = error.response.data.message;
+        setSnackbar({ open: true, message: msg, severity: 'error' });
       } finally {
         setLoading(false);
       }
     },
-    enableReinitialize: true,
+    enableReinitialize: true, // initialValues değişirse form otomatik resetlenir
   });
 
+  // Modal her kapandığında formu sıfırla (garanti!)
+  useEffect(() => {
+    if (!open) {
+      formik.resetForm();
+    }
+    // eslint-disable-next-line
+  }, [open]);
+
+  // Select ve select-multi field'lar için options çekme
   useEffect(() => {
     fields.forEach((field) => {
       if ((field.type === 'select' || field.type === 'select-multi') && field.optionsUrl) {
@@ -100,8 +119,11 @@ export default function BaseFormModal({
     const value = formik.values[name];
     const error = formik.touched[name] && Boolean(formik.errors[name]);
     const helperText = formik.touched[name] && formik.errors[name];
-
     const options = optionsMap[name] || [];
+
+    const autoCompleteValue =
+      field.autoComplete ||
+      (name.toLowerCase().includes('password') || name.toLowerCase().includes('email') ? 'new-password' : 'off');
 
     if (type === 'select-multi') {
       return (
@@ -149,6 +171,7 @@ export default function BaseFormModal({
           margin="normal"
           error={error}
           helperText={helperText}
+          autoComplete={autoCompleteValue}
         >
           {options.map((opt) => (
             <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
@@ -176,6 +199,8 @@ export default function BaseFormModal({
         margin="normal"
         error={error}
         helperText={helperText}
+        autoComplete={autoCompleteValue}
+        disabled={externalLoading || loading}
       />
     );
   };
@@ -184,12 +209,16 @@ export default function BaseFormModal({
     <>
       <Dialog
         open={open}
-        onClose={() => {}}
+        onClose={() => {}} // ESC ve backdrop disable için boş bırakıldı
         fullWidth
         maxWidth="sm"
         disableEscapeKeyDown
       >
-        <form onSubmit={formik.handleSubmit} autoComplete="off">
+        <form
+          key={JSON.stringify(initialValues)} // Form zorla resetlenir
+          onSubmit={formik.handleSubmit}
+          autoComplete="off"
+        >
           <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold' }}>
             {initialData?.id ? `${title} Güncelle` : `Yeni ${title} Ekle`}
             <IconButton
@@ -231,8 +260,8 @@ export default function BaseFormModal({
               variant="contained"
               color="primary"
               disableElevation
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+              disabled={externalLoading || loading}
+              startIcon={(externalLoading || loading) ? <CircularProgress size={20} color="inherit" /> : null}
             >
               Kaydet
             </Button>
@@ -246,7 +275,11 @@ export default function BaseFormModal({
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
