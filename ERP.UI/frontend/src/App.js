@@ -11,6 +11,8 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Me from './pages/Me';
 import BranchListPage from './pages/BranchListPage';
+import UserListPage from './pages/UserListPage'; // 🔽 Ekledik
+import RoleListPage from './pages/RoleListPage';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -80,6 +82,16 @@ function App() {
             path="/branchs"
             element={<BranchListPage darkMode={darkMode} setDarkMode={setDarkMode} />}
           />
+           <Route
+             path="/users"
+               element={<UserListPage darkMode={darkMode} setDarkMode={setDarkMode} />} // ✅ Yeni rota
+  />
+
+<Route
+  path="/roles"
+  element={<RoleListPage darkMode={darkMode} setDarkMode={setDarkMode} />}
+/>
+
         </Routes>
       </Router>
     </ThemeProvider>

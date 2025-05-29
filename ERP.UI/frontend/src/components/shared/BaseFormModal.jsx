@@ -1,14 +1,25 @@
 import {
-  Dialog, DialogContent, DialogActions,
-  TextField, Button, DialogTitle,
-  IconButton, Box, CircularProgress, Snackbar, Alert
+  Dialog,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  DialogTitle,
+  IconButton,
+  Box,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  MenuItem,
+  Checkbox,
+  ListItemText
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFormik } from 'formik';
 import { motion } from 'framer-motion';
+import axios from '../../services/axios-instance';
 
-// XSS filtreleme
 const stripHtml = (str) => str.replace(/<\/?[^>]+(>|$)/g, '');
 
 export default function BaseFormModal({
@@ -22,11 +33,11 @@ export default function BaseFormModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [optionsMap, setOptionsMap] = useState({});
 
-  // initialValues artık dinamik, initialData'ya göre hesaplanıyor
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {
-      acc[field.name] = initialData?.[field.name] ?? '';
+      acc[field.name] = initialData?.[field.name] ?? (field.type === 'select-multi' ? [] : '');
       return acc;
     }, {});
   }, [initialData, fields]);
@@ -37,7 +48,9 @@ export default function BaseFormModal({
     onSubmit: async (values) => {
       setLoading(true);
       const cleanValues = Object.fromEntries(
-        Object.entries(values).map(([key, val]) => [key, stripHtml(val)])
+        Object.entries(values).map(([key, val]) =>
+          [key, typeof val === 'string' ? stripHtml(val) : val]
+        )
       );
       try {
         await onSave(cleanValues);
@@ -52,8 +65,119 @@ export default function BaseFormModal({
     enableReinitialize: true,
   });
 
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
+  useEffect(() => {
+    fields.forEach((field) => {
+      if ((field.type === 'select' || field.type === 'select-multi') && field.optionsUrl) {
+        axios.get(field.optionsUrl)
+          .then(res => {
+            setOptionsMap(prev => ({
+              ...prev,
+              [field.name]: res.data || []
+            }));
+          })
+          .catch(() => {
+            setOptionsMap(prev => ({ ...prev, [field.name]: [] }));
+          });
+      }
+    });
+  }, [fields]);
+
+  const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
+
+  const renderField = (field) => {
+    const {
+      name,
+      label,
+      required,
+      type = 'text',
+      multiline,
+      rows,
+      maxLength,
+      optionLabel = 'name',
+      optionValue = 'id'
+    } = field;
+
+    const value = formik.values[name];
+    const error = formik.touched[name] && Boolean(formik.errors[name]);
+    const helperText = formik.touched[name] && formik.errors[name];
+
+    const options = optionsMap[name] || [];
+
+    if (type === 'select-multi') {
+      return (
+        <TextField
+          key={name}
+          select
+          fullWidth
+          label={label}
+          name={name}
+          value={value}
+          onChange={(e) => formik.setFieldValue(name, e.target.value)}
+          onBlur={formik.handleBlur}
+          margin="normal"
+          error={error}
+          helperText={helperText}
+          SelectProps={{
+            multiple: true,
+            renderValue: (selected) => {
+              const selectedItems = options.filter(opt => selected.includes(opt[optionValue]));
+              return selectedItems.map(opt => opt[optionLabel]).join(', ');
+            }
+          }}
+        >
+          {options.map((opt) => (
+            <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
+              <Checkbox checked={value.includes(opt[optionValue])} size="small" />
+              <ListItemText primary={opt[optionLabel]} />
+            </MenuItem>
+          ))}
+        </TextField>
+      );
+    }
+
+    if (type === 'select') {
+      return (
+        <TextField
+          key={name}
+          select
+          fullWidth
+          label={label}
+          name={name}
+          value={value}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          margin="normal"
+          error={error}
+          helperText={helperText}
+        >
+          {options.map((opt) => (
+            <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
+              {opt[optionLabel]}
+            </MenuItem>
+          ))}
+        </TextField>
+      );
+    }
+
+    return (
+      <TextField
+        key={name}
+        fullWidth
+        type={type}
+        name={name}
+        label={label}
+        value={value}
+        required={required}
+        multiline={multiline}
+        rows={rows}
+        inputProps={{ maxLength }}
+        onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        margin="normal"
+        error={error}
+        helperText={helperText}
+      />
+    );
   };
 
   return (
@@ -65,29 +189,27 @@ export default function BaseFormModal({
         maxWidth="sm"
         disableEscapeKeyDown
       >
-        <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold' }}>
-          {initialData ? `${title} Güncelle` : `Yeni ${title} Ekle`}
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              backgroundColor: 'error.main',
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'error.dark',
-              },
-              width: 40,
-              height: 40,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-
         <form onSubmit={formik.handleSubmit} autoComplete="off">
+          <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold' }}>
+            {initialData?.id ? `${title} Güncelle` : `Yeni ${title} Ekle`}
+            <IconButton
+              aria-label="close"
+              onClick={onClose}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                backgroundColor: 'error.main',
+                color: 'white',
+                '&:hover': { backgroundColor: 'error.dark' },
+                width: 40,
+                height: 40,
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+
           <DialogContent dividers>
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -95,20 +217,7 @@ export default function BaseFormModal({
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <Box display="flex" flexDirection="column" gap={2}>
-                {fields.map((field) => (
-                  <TextField
-                    key={field.name}
-                    label={field.label}
-                    name={field.name}
-                    required={field.required}
-                    multiline={field.multiline}
-                    rows={field.rows}
-                    inputProps={{ maxLength: field.maxLength }}
-                    {...formik.getFieldProps(field.name)}
-                    error={formik.touched[field.name] && Boolean(formik.errors[field.name])}
-                    helperText={formik.touched[field.name] && formik.errors[field.name]}
-                  />
-                ))}
+                {fields.map(renderField)}
               </Box>
             </motion.div>
           </DialogContent>
