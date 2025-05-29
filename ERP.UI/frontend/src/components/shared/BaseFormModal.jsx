@@ -221,22 +221,37 @@ export default function BaseFormModal({
         >
           <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold' }}>
             {initialData?.id ? `${title} Güncelle` : `Yeni ${title} Ekle`}
-            <IconButton
-              aria-label="close"
-              onClick={onClose}
-              sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                backgroundColor: 'error.main',
-                color: 'white',
-                '&:hover': { backgroundColor: 'error.dark' },
-                width: 40,
-                height: 40,
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
+<IconButton
+  aria-label="close"
+  onClick={onClose}
+  sx={{
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    backgroundColor: '#212121', // Daha koyu ve net
+    color: '#fff',
+    border: '2px solid #FF1744', // Kalın kırmızı kenarlık
+    borderRadius: '4px', // Tam köşeli için 0, hafif köşeli için 4px
+    width: 32,
+    height: 32,
+    minWidth: 0, // Tam küçük ve sıkı olması için
+    minHeight: 0,
+    boxShadow: 'none', // Shadow yok
+    padding: 0,
+    fontWeight: 'bold',
+    '&:hover': {
+      backgroundColor: '#FF1744',
+      color: '#fff',
+      border: '2px solid #212121',
+      boxShadow: 'none',
+    },
+    outline: '1px solid #fff',
+    outlineOffset: '-3px',
+  }}
+>
+  <CloseIcon fontSize="small" />
+</IconButton>
+
           </DialogTitle>
 
           <DialogContent dividers>
