@@ -21,40 +21,59 @@ function Welcome() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        px: { xs: 2, sm: 0 }, // mobile'de kenarlardan boşluk
       }}
     >
       <Container
         maxWidth="sm"
         sx={{
           bgcolor: theme.palette.mode === 'light'
-            ? 'rgba(255, 255, 255, 0.7)'
-            : 'rgba(25, 39, 62, 0.8)',
-          p: 5,
-          borderRadius: 3,
+            ? 'rgba(255, 255, 255, 0.85)'
+            : 'rgba(25, 39, 62, 0.92)',
+          p: { xs: 2, sm: 5 },
+          borderRadius: { xs: 2, sm: 3 },
           boxShadow: 5,
           color: theme.palette.text.primary,
+          width: '100%',
         }}
       >
         <Typography
-          variant="h3"
+          variant="h4"
           gutterBottom
           align="center"
           color="primary"
           fontWeight="bold"
+          sx={{
+            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+            mt: { xs: 1, sm: 0 },
+          }}
         >
           ERP Sistemine Hoş Geldiniz
         </Typography>
 
-        <Typography variant="subtitle1" align="center" color="text.secondary">
+        <Typography
+          variant="subtitle1"
+          align="center"
+          color="text.secondary"
+          sx={{
+            fontSize: { xs: '1rem', sm: '1.1rem' }
+          }}
+        >
           Lütfen giriş yapın veya yeni bir firma kaydı oluşturun.
         </Typography>
 
-        <Stack spacing={2} direction="row" justifyContent="center" mt={4}>
+        <Stack
+          spacing={2}
+          direction={{ xs: 'column', sm: 'row' }}
+          justifyContent="center"
+          mt={4}
+        >
           <Button
             variant="contained"
             startIcon={<LoginIcon />}
             onClick={() => navigate('/login')}
             size="large"
+            fullWidth
           >
             Giriş Yap
           </Button>
@@ -63,6 +82,7 @@ function Welcome() {
             startIcon={<PersonAddIcon />}
             onClick={() => navigate('/register')}
             size="large"
+            fullWidth
           >
             Kayıt Ol
           </Button>

@@ -1,19 +1,18 @@
 import {
   Box, Stack, Typography, TextField, IconButton, Tooltip, Button,
-  Paper, useTheme
+  Paper, useTheme, useMediaQuery
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { useMemo, useState, useEffect } from 'react';
 
 import AddIcon from '@mui/icons-material/MapsUgcTwoTone';
-import EditIcon from '@mui/icons-material/NextPlanTwoTone';
-import DeleteIcon from '@mui/icons-material/HighlightOffTwoTone';
-import ContentCopyIcon from '@mui/icons-material/CopyrightTwoTone';
+import EditIcon from '@mui/icons-material/DriveFileRenameOutline';
+import DeleteIcon from '@mui/icons-material/Clear';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
 import FileDownloadIcon from '@mui/icons-material/FileDownloadTwoTone';
-
 
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -52,6 +51,8 @@ export default function BaseListPage({
   NoRowsOverlay,
 }) {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
@@ -138,7 +139,6 @@ export default function BaseListPage({
     }
   };
 
-  // Eğer dışarıdan odaklanmak istenirse veya rows değişirse focusRowId güncelle
   useEffect(() => {
     if (focusRowId && !rows.find(r => getRowId(r) === focusRowId)) {
       setFocusRowId(null);
@@ -146,15 +146,33 @@ export default function BaseListPage({
   }, [rows, focusRowId, getRowId]);
 
   return (
-    <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column', backgroundColor: theme.palette.background.default }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5" fontWeight="bold">{title}</Typography>
-        <Stack direction="row" spacing={1}>
+    <Box
+      sx={{
+        height: { xs: 'auto', md: 'calc(100vh - 120px)' },
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: theme.palette.background.default,
+        p: { xs: 1, sm: 2, md: 3 }
+      }}
+    >
+      <Stack
+        direction={isMobile ? 'column' : 'row'}
+        justifyContent={isMobile ? 'flex-start' : 'space-between'}
+        alignItems={isMobile ? 'stretch' : 'center'}
+        spacing={isMobile ? 1 : 0}
+        mb={2}
+      >
+        <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold" mb={isMobile ? 1 : 0}>
+          {title}
+        </Typography>
+        <Stack direction="row" spacing={1} justifyContent={isMobile ? "flex-start" : "flex-end"}>
           {onAdd && (
-            <Button startIcon={<AddIcon />} variant="contained" size="large" color="primary" onClick={handleAdd}>Yeni</Button>
+            <Button startIcon={<AddIcon />} variant="contained" size={isMobile ? "medium" : "large"} color="primary" onClick={handleAdd}>
+              {isMobile ? '' : 'Yeni'}
+            </Button>
           )}
           <Tooltip title="Excel'e Aktar">
-            <IconButton color="success" size="large" onClick={handleExportExcel}>
+            <IconButton color="success" size={isMobile ? "medium" : "large"} onClick={handleExportExcel}>
               <FileDownloadIcon />
             </IconButton>
           </Tooltip>
@@ -177,77 +195,94 @@ export default function BaseListPage({
               </IconButton>
             ),
           }}
-          sx={{ mb: 2, backgroundColor: theme.palette.background.paper, borderRadius: 1 }}
+          sx={{
+            mb: 2,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 1,
+            fontSize: { xs: '1rem', sm: '1.1rem' }
+          }}
         />
       )}
 
-      <Paper elevation={2} sx={{ flex: 1, backgroundColor: theme.palette.background.paper }}>
-        {rows.length === 0 && !loading ? (
-          NoRowsOverlay
-            ? <NoRowsOverlay onAdd={handleAdd} />
-            : <DefaultNoRowsOverlay onAdd={handleAdd} />
-        ) : (
-          <DataGrid
-            rows={rows}
-            columns={extendedColumns}
-            rowCount={rowCount}
-            loading={loading}
-            paginationMode="server"
-            page={page}
-            pageSize={pageSize}
-            onPageChange={onPageChange}
-            onPageSizeChange={(newSize) => {
-              onPageSizeChange(newSize);
-              onPageChange(0);
-            }}
-            getRowId={getRowId}
-            disableRowSelectionOnClick
+      <Paper
+        elevation={2}
+        sx={{
+          flex: 1,
+          backgroundColor: theme.palette.background.paper,
+          minHeight: 240,
+          p: isMobile ? 0 : 1,
+          borderRadius: { xs: 2, sm: 3, md: 3 },
+          width: '100%',
+          overflowX: 'auto'
+        }}
+      >
+        <Box sx={{ width: '100%', height: isMobile ? 400 : '100%' }}>
+          {rows.length === 0 && !loading ? (
+            NoRowsOverlay
+              ? <NoRowsOverlay onAdd={handleAdd} />
+              : <DefaultNoRowsOverlay onAdd={handleAdd} />
+          ) : (
+            <DataGrid
+              rows={rows}
+              columns={extendedColumns}
+              rowCount={rowCount}
+              loading={loading}
+              paginationMode="server"
+              page={page}
+              pageSize={pageSize}
+              onPageChange={onPageChange}
+              onPageSizeChange={(newSize) => {
+                onPageSizeChange(newSize);
+                onPageChange(0);
+              }}
+              getRowId={getRowId}
+              disableRowSelectionOnClick
 
-            // FOCUS HANDLING
-            onRowClick={(params) => setFocusRowId(params.id)}
-            onCellClick={(params) => setFocusRowId(params.id)}
-            onRowEditStop={(params) => setFocusRowId(params.id)}
-            onRowEditCommit={(id) => setFocusRowId(id)}
-            getRowClassName={(params) =>
-              focusRowId === params.id ? 'MuiDataGrid-row--focused' : ''
-            }
-            sx={{
-              border: 'none',
-              '& .MuiDataGrid-columnHeaders': {
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-                fontWeight: 'bold',
-                fontSize: 18,
-                minHeight: 60,
-                maxHeight: 60,
-                lineHeight: '60px',
-                '& .MuiDataGrid-columnHeaderTitle': {
-                  fontWeight: 700,
-                  paddingY: 2,
+              // FOCUS HANDLING
+              onRowClick={(params) => setFocusRowId(params.id)}
+              onCellClick={(params) => setFocusRowId(params.id)}
+              onRowEditStop={(params) => setFocusRowId(params.id)}
+              onRowEditCommit={(id) => setFocusRowId(id)}
+              getRowClassName={(params) =>
+                focusRowId === params.id ? 'MuiDataGrid-row--focused' : ''
+              }
+              sx={{
+                border: 'none',
+                fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: theme.palette.background.paper,
+                  color: theme.palette.text.primary,
+                  fontWeight: 'bold',
+                  fontSize: { xs: 15, sm: 18 },
+                  minHeight: { xs: 38, sm: 60 },
+                  maxHeight: { xs: 38, sm: 60 },
+                  lineHeight: { xs: '38px', sm: '60px' },
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    fontWeight: 700,
+                    paddingY: 2,
+                  },
                 },
-              },
-              '& .MuiDataGrid-row:hover': {
-                backgroundColor: theme.palette.action.hover,
-                cursor: 'pointer',
-              },
-              // FOCUS ROW STYLE: sadece background, bol ama "atlama" yok!
-              '& .MuiDataGrid-row--focused': {
-                backgroundColor: theme.palette.action.selected,
-                fontWeight: 600,
-                // border yok, padding yok, transition yok!
-              },
-              // Focus border ve outline tamamen kapalı!
-              '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
-                outline: 'none !important',
-                border: 'none !important',
-              },
-              '& .MuiDataGrid-row:focus, & .MuiDataGrid-row:focus-within': {
-                outline: 'none !important',
-                border: 'none !important',
-              },
-            }}
-          />
-        )}
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: theme.palette.action.hover,
+                  cursor: 'pointer',
+                },
+                '& .MuiDataGrid-row--focused': {
+                  backgroundColor: theme.palette.action.selected,
+                  fontWeight: 600,
+                },
+                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+                  outline: 'none !important',
+                  border: 'none !important',
+                },
+                '& .MuiDataGrid-row:focus, & .MuiDataGrid-row:focus-within': {
+                  outline: 'none !important',
+                  border: 'none !important',
+                },
+              }}
+              autoHeight={isMobile}
+            />
+          )}
+        </Box>
       </Paper>
 
       <ConfirmDialog

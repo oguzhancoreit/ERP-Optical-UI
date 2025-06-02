@@ -12,7 +12,9 @@ import {
   Checkbox,
   ListItemText,
   Snackbar,
-  Alert
+  Alert,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useMemo, useEffect } from 'react';
@@ -34,13 +36,12 @@ export default function BaseFormModal({
   successMessage = "Kayıt başarıyla tamamlandı.",
   errorMessage = "Kayıt sırasında bir hata oluştu."
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [loading, setLoading] = useState(false);
   const [optionsMap, setOptionsMap] = useState({});
-
-  // Snackbar state burada!
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  // Her açılışta ve field-list değiştiğinde sıfırdan initialValues oluştur.
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {
       acc[field.name] = initialData?.[field.name] ?? (field.type === 'select-multi' ? [] : '');
@@ -48,7 +49,6 @@ export default function BaseFormModal({
     }, {});
   }, [initialData, fields]);
 
-  // Formik ile form state ve otomatik reset
   const formik = useFormik({
     initialValues,
     validationSchema,
@@ -72,10 +72,9 @@ export default function BaseFormModal({
         setLoading(false);
       }
     },
-    enableReinitialize: true, // initialValues değişirse form otomatik resetlenir
+    enableReinitialize: true,
   });
 
-  // Modal her kapandığında formu sıfırla (garanti!)
   useEffect(() => {
     if (!open) {
       formik.resetForm();
@@ -83,7 +82,6 @@ export default function BaseFormModal({
     // eslint-disable-next-line
   }, [open]);
 
-  // Select ve select-multi field'lar için options çekme
   useEffect(() => {
     fields.forEach((field) => {
       if ((field.type === 'select' || field.type === 'select-multi') && field.optionsUrl) {
@@ -146,6 +144,11 @@ export default function BaseFormModal({
               return selectedItems.map(opt => opt[optionLabel]).join(', ');
             }
           }}
+          size={isMobile ? "small" : "medium"}
+          sx={{
+            fontSize: isMobile ? '0.96rem' : undefined,
+            mb: isMobile ? 1 : 2,
+          }}
         >
           {options.map((opt) => (
             <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
@@ -172,6 +175,11 @@ export default function BaseFormModal({
           error={error}
           helperText={helperText}
           autoComplete={autoCompleteValue}
+          size={isMobile ? "small" : "medium"}
+          sx={{
+            fontSize: isMobile ? '0.96rem' : undefined,
+            mb: isMobile ? 1 : 2,
+          }}
         >
           {options.map((opt) => (
             <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
@@ -201,6 +209,11 @@ export default function BaseFormModal({
         helperText={helperText}
         autoComplete={autoCompleteValue}
         disabled={externalLoading || loading}
+        size={isMobile ? "small" : "medium"}
+        sx={{
+          fontSize: isMobile ? '0.96rem' : undefined,
+          mb: isMobile ? 1 : 2,
+        }}
       />
     );
   };
@@ -209,65 +222,93 @@ export default function BaseFormModal({
     <>
       <Dialog
         open={open}
-        onClose={() => {}} // ESC ve backdrop disable için boş bırakıldı
+        onClose={() => {}} // ESC ve backdrop disable
         fullWidth
         maxWidth="sm"
+        fullScreen={isMobile}
         disableEscapeKeyDown
+        PaperProps={{
+          sx: {
+            m: { xs: 0, sm: 3 },
+            borderRadius: { xs: 0, sm: 3 },
+          }
+        }}
       >
         <form
-          key={JSON.stringify(initialValues)} // Form zorla resetlenir
+          key={JSON.stringify(initialValues)}
           onSubmit={formik.handleSubmit}
           autoComplete="off"
         >
-          <DialogTitle sx={{ m: 0, p: 2, fontWeight: 'bold' }}>
+          <DialogTitle
+            sx={{
+              m: 0,
+              p: isMobile ? 2 : 3,
+              fontWeight: 'bold',
+              fontSize: isMobile ? '1.2rem' : '1.3rem',
+            }}
+          >
             {initialData?.id ? `${title} Güncelle` : `Yeni ${title} Ekle`}
-<IconButton
-  aria-label="close"
-  onClick={onClose}
-  sx={{
-    position: 'absolute',
-    right: 8,
-    top: 8,
-    backgroundColor: '#212121', // Daha koyu ve net
-    color: '#fff',
-    border: '2px solid #FF1744', // Kalın kırmızı kenarlık
-    borderRadius: '4px', // Tam köşeli için 0, hafif köşeli için 4px
-    width: 32,
-    height: 32,
-    minWidth: 0, // Tam küçük ve sıkı olması için
-    minHeight: 0,
-    boxShadow: 'none', // Shadow yok
-    padding: 0,
-    fontWeight: 'bold',
-    '&:hover': {
-      backgroundColor: '#FF1744',
-      color: '#fff',
-      border: '2px solid #212121',
-      boxShadow: 'none',
-    },
-    outline: '1px solid #fff',
-    outlineOffset: '-3px',
-  }}
->
-  <CloseIcon fontSize="small" />
-</IconButton>
-
+            <IconButton
+              aria-label="close"
+              onClick={onClose}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                backgroundColor: '#212121',
+                color: '#fff',
+                border: '2px solid #FF1744',
+                borderRadius: '4px',
+                width: 32,
+                height: 32,
+                minWidth: 0,
+                minHeight: 0,
+                boxShadow: 'none',
+                padding: 0,
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: '#FF1744',
+                  color: '#fff',
+                  border: '2px solid #212121',
+                  boxShadow: 'none',
+                },
+                outline: '1px solid #fff',
+                outlineOffset: '-3px',
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
           </DialogTitle>
 
-          <DialogContent dividers>
+          <DialogContent
+            dividers
+            sx={{
+              px: isMobile ? 2 : 3,
+              py: isMobile ? 1.5 : 2.5,
+              maxHeight: isMobile ? 'unset' : '60vh',
+            }}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
-              <Box display="flex" flexDirection="column" gap={2}>
+              <Box display="flex" flexDirection="column" gap={isMobile ? 1 : 2}>
                 {fields.map(renderField)}
               </Box>
             </motion.div>
           </DialogContent>
 
-          <DialogActions>
-            <Button onClick={onClose} color="inherit" disableElevation>
+          <DialogActions
+            sx={{
+              p: isMobile ? 1 : 2,
+              borderTop: '1px solid #eee',
+              position: isMobile ? 'sticky' : 'static',
+              bottom: 0,
+              bgcolor: isMobile ? theme.palette.background.paper : 'inherit',
+            }}
+          >
+            <Button onClick={onClose} color="inherit" disableElevation size={isMobile ? 'small' : 'medium'}>
               İptal
             </Button>
             <Button
@@ -277,6 +318,7 @@ export default function BaseFormModal({
               disableElevation
               disabled={externalLoading || loading}
               startIcon={(externalLoading || loading) ? <CircularProgress size={20} color="inherit" /> : null}
+              size={isMobile ? 'small' : 'medium'}
             >
               Kaydet
             </Button>
@@ -288,7 +330,7 @@ export default function BaseFormModal({
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: isMobile ? 'top' : 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={handleSnackbarClose}

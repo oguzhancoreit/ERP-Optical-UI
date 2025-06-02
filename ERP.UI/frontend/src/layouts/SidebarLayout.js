@@ -1,7 +1,7 @@
 import {
   Box, CssBaseline, Drawer, List, ListItem, ListItemButton,
   ListItemIcon, ListItemText, Toolbar, AppBar, Typography,
-  IconButton, Collapse, useTheme, Tooltip, Divider, TextField, InputAdornment
+  IconButton, Collapse, useTheme, Tooltip, Divider, TextField, InputAdornment, useMediaQuery
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -87,16 +87,24 @@ export default function SidebarLayout({
   const location = useLocation();
   const theme = useTheme();
 
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  // MEDİA QUERY: Mobil mi?
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(!isMobile);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Arama, menü açık/kapalı
   const [search, setSearch] = useState('');
   const [openMenus, setOpenMenus] = useState({});
-  const didAutoExpand = useRef(false); // <-- önemli kısım
+  const didAutoExpand = useRef(false);
 
+  // Drawer genişliği
   const drawerWidth = drawerOpen ? expandedDrawerWidth : collapsedDrawerWidth;
 
   const filteredMenuItems = useMemo(() => filterMenu(menuItems, search), [search]);
 
-  // Sadece ilk açılışta aktif parent menüyü expand yap!
+  // Aktif parent menu expand
   useEffect(() => {
     if (didAutoExpand.current) return;
     menuItems.forEach(item => {
@@ -111,7 +119,6 @@ export default function SidebarLayout({
     // eslint-disable-next-line
   }, []);
 
-  // Parent menüleri elle açıp kapama
   const toggleSubMenu = (key) => {
     setOpenMenus(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -124,7 +131,7 @@ export default function SidebarLayout({
           px: 2,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: drawerOpen ? 'flex-start' : 'center',
+          justifyContent: drawerOpen || isMobile ? 'flex-start' : 'center',
         }}
       >
         <Box
@@ -134,20 +141,19 @@ export default function SidebarLayout({
           onClick={() => navigate('/')}
           sx={{
             height: 45,
-            mr: drawerOpen ? 1 : 0,
+            mr: drawerOpen || isMobile ? 1 : 0,
             transition: 'margin 0.3s',
             cursor: 'pointer',
           }}
         />
-        {drawerOpen && (
+        {(drawerOpen || isMobile) && (
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
             Core Optical
           </Typography>
         )}
       </Toolbar>
 
-      {/* Sidebar Search */}
-      <Box px={drawerOpen ? 2 : 1} pb={1} pt={drawerOpen ? 0 : 2}>
+      <Box px={drawerOpen || isMobile ? 2 : 1} pb={1} pt={drawerOpen || isMobile ? 0 : 2}>
         <TextField
           fullWidth
           size="small"
@@ -162,14 +168,14 @@ export default function SidebarLayout({
             ),
           }}
           sx={{
-            display: drawerOpen ? 'block' : 'none',
+            display: drawerOpen || isMobile ? 'block' : 'none',
             backgroundColor: theme.palette.background.paper,
             borderRadius: 2,
           }}
         />
       </Box>
 
-      <Divider sx={{ mb: 1, display: drawerOpen ? 'block' : 'none' }} />
+      <Divider sx={{ mb: 1, display: drawerOpen || isMobile ? 'block' : 'none' }} />
 
       <List disablePadding sx={{ flexGrow: 1 }}>
         {filteredMenuItems.map((item) => {
@@ -179,13 +185,14 @@ export default function SidebarLayout({
           return (
             <Box key={item.text}>
               <ListItem disablePadding>
-                <Tooltip title={item.text} placement="right" disableHoverListener={drawerOpen}>
+                <Tooltip title={item.text} placement="right" disableHoverListener={drawerOpen || isMobile}>
                   <ListItemButton
                     onClick={() => {
                       if (item.children) {
                         toggleSubMenu(item.text);
                       } else if (item.path) {
                         navigate(item.path);
+                        if (isMobile) setMobileDrawerOpen(false);
                       }
                     }}
                     selected={isActive || isChildActive}
@@ -193,19 +200,19 @@ export default function SidebarLayout({
                   >
                     <ListItemIcon sx={{
                       minWidth: 0,
-                      mr: drawerOpen ? 2 : 'auto',
+                      mr: drawerOpen || isMobile ? 2 : 'auto',
                       justifyContent: 'center',
                       color: 'inherit'
                     }}>
                       {item.icon}
                     </ListItemIcon>
-                    {drawerOpen && (
+                    {(drawerOpen || isMobile) && (
                       <ListItemText
                         primary={item.text}
                         primaryTypographyProps={{ sx: { color: 'inherit' } }}
                       />
                     )}
-                    {item.children && drawerOpen && (
+                    {item.children && (drawerOpen || isMobile) && (
                       openMenus[item.text]
                         ? <ExpandLess />
                         : <ExpandMore />
@@ -221,15 +228,16 @@ export default function SidebarLayout({
                       const isChildRouteActive = location.pathname === child.path;
                       return (
                         <ListItem key={child.text} disablePadding>
-                          <Tooltip title={child.text} placement="right" disableHoverListener={drawerOpen}>
+                          <Tooltip title={child.text} placement="right" disableHoverListener={drawerOpen || isMobile}>
                             <ListItemButton
                               onClick={e => {
                                 e.stopPropagation();
                                 navigate(child.path);
+                                if (isMobile) setMobileDrawerOpen(false);
                               }}
                               selected={isChildRouteActive}
                               sx={{
-                                pl: drawerOpen ? 6 : 3,
+                                pl: drawerOpen || isMobile ? 6 : 3,
                                 py: 0.5,
                                 minHeight: 36,
                                 backgroundColor: isChildRouteActive
@@ -249,7 +257,7 @@ export default function SidebarLayout({
                               >
                                 {child.icon}
                               </ListItemIcon>
-                              {drawerOpen && (
+                              {(drawerOpen || isMobile) && (
                                 <ListItemText
                                   primary={child.text}
                                   primaryTypographyProps={{
@@ -280,34 +288,38 @@ export default function SidebarLayout({
       <Box>
         <List disablePadding>
           <ListItem disablePadding>
-            <Tooltip title="Ayarlar" placement="right" disableHoverListener={drawerOpen}>
+            <Tooltip title="Ayarlar" placement="right" disableHoverListener={drawerOpen || isMobile}>
               <ListItemButton
-                onClick={() => navigate('/settings')}
+                onClick={() => {
+                  navigate('/settings');
+                  if (isMobile) setMobileDrawerOpen(false);
+                }}
                 selected={location.pathname === '/settings'}
                 sx={{ px: 3 }}
               >
-                <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
+                <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen || isMobile ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
                   <SettingsIcon sx={{ color: '#ff5722' }} />
                 </ListItemIcon>
-                {drawerOpen && (
+                {(drawerOpen || isMobile) && (
                   <ListItemText primary="Ayarlar" primaryTypographyProps={{ sx: { color: 'inherit' } }} />
                 )}
               </ListItemButton>
             </Tooltip>
           </ListItem>
           <ListItem disablePadding>
-            <Tooltip title="Çıkış" placement="right" disableHoverListener={drawerOpen}>
+            <Tooltip title="Çıkış" placement="right" disableHoverListener={drawerOpen || isMobile}>
               <ListItemButton
                 onClick={() => {
                   localStorage.clear();
                   navigate('/');
+                  if (isMobile) setMobileDrawerOpen(false);
                 }}
                 sx={{ px: 3 }}
               >
-                <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
+                <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen || isMobile ? 2 : 'auto', justifyContent: 'center', color: 'inherit' }}>
                   <LogoutIcon />
                 </ListItemIcon>
-                {drawerOpen && (
+                {(drawerOpen || isMobile) && (
                   <ListItemText primary="Çıkış" primaryTypographyProps={{ sx: { color: 'inherit' } }} />
                 )}
               </ListItemButton>
@@ -322,53 +334,39 @@ export default function SidebarLayout({
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
 
-      <AppBar
-        position="fixed"
-        elevation={1}
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          borderRadius: 0,
-        }}
-      >
-        <Toolbar
+      {/* Mobilde geçici Drawer, masaüstünde permanent */}
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: 0 }}>
+        {/* Mobil için temporary Drawer */}
+        <Drawer
+          variant="temporary"
+          open={mobileDrawerOpen}
+          onClose={() => setMobileDrawerOpen(false)}
+          ModalProps={{
+            keepMounted: true, // Performans için
+          }}
           sx={{
-            justifyContent: 'space-between',
-            minHeight: 64,
-            px: 3,
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': {
+              width: expandedDrawerWidth,
+              boxSizing: 'border-box',
+              backgroundColor:
+                theme.palette.mode === 'dark'
+                  ? theme.palette.background.paper
+                  : theme.palette.primary.main,
+              color:
+                theme.palette.mode === 'dark'
+                  ? theme.palette.text.primary
+                  : theme.palette.primary.contrastText,
+            },
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton onClick={() => setDrawerOpen(!drawerOpen)} sx={{ mr: 2 }} color="inherit">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap>
-              Net gör, Net yönet!
-            </Typography>
-          </Box>
-          <Box>
-            <Tooltip title={darkMode ? "Aydınlık moda geç" : "Karanlık moda geç"}>
-              <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
-                {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Bildirimler">
-              <IconButton color="inherit">
-                <NotificationsNoneIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Profil">
-              <IconButton color="inherit">
-                <AccountCircleIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Toolbar>
-      </AppBar>
+          {drawer}
+        </Drawer>
 
-      <Box component="nav" sx={{ width: drawerWidth, flexShrink: 0 }}>
+        {/* Masaüstü için permanent Drawer */}
         <Drawer
           variant="permanent"
+          open={drawerOpen}
           sx={{
             display: { xs: 'none', sm: 'block' },
             '& .MuiDrawer-paper': {
@@ -386,25 +384,79 @@ export default function SidebarLayout({
                   : theme.palette.primary.contrastText,
             },
           }}
-          open
         >
           {drawer}
         </Drawer>
       </Box>
 
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          minHeight: '100vh',
-          p: 3,
-        }}
-      >
-        <Toolbar />
-        {children}
+      <Box sx={{ flexGrow: 1, width: '100%' }}>
+        <AppBar
+          position="fixed"
+          elevation={1}
+          sx={{
+            width: { sm: `calc(100% - ${drawerWidth}px)` },
+            ml: { sm: `${drawerWidth}px` },
+            borderRadius: 0,
+          }}
+        >
+          <Toolbar
+            sx={{
+              justifyContent: 'space-between',
+              minHeight: 64,
+              px: 3,
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {/* Mobilde hamburger, masaüstünde collapse */}
+              <IconButton
+                onClick={() => {
+                  if (isMobile) setMobileDrawerOpen(true);
+                  else setDrawerOpen(!drawerOpen);
+                }}
+                sx={{ mr: 2 }}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="h6" noWrap>
+                Net gör, Net yönet!
+              </Typography>
+            </Box>
+            <Box>
+              <Tooltip title={darkMode ? "Aydınlık moda geç" : "Karanlık moda geç"}>
+                <IconButton onClick={() => setDarkMode(!darkMode)} color="inherit">
+                  {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Bildirimler">
+                <IconButton color="inherit">
+                  <NotificationsNoneIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Profil">
+                <IconButton color="inherit">
+                  <AccountCircleIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Toolbar>
+        </AppBar>
+
+        {/* Main Content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            width: '100%',
+            minHeight: '100vh',
+            p: { xs: 1, sm: 3 },
+            mt: { xs: 7, sm: 0 } // Mobilde AppBar altında boşluk bırak
+          }}
+        >
+          <Toolbar sx={{ display: { xs: 'none', sm: 'block' } }} />
+          {children}
+        </Box>
       </Box>
     </Box>
   );
 }
-

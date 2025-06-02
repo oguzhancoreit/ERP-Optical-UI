@@ -42,24 +42,27 @@ function Login() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        px: 2,
+        px: 1,
         animation: 'fadeIn 1.5s ease-in-out',
       }}
     >
-      <Container maxWidth="md">
+      <Container maxWidth="md" sx={{ px: { xs: 0, sm: 2 } }}>
         <Paper
           elevation={24}
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
-            borderRadius: 6,
+            borderRadius: { xs: 2, sm: 6 },
             overflow: 'hidden',
             bgcolor: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
-            transform: 'scale(0.95)',
+            transform: 'scale(0.97)',
             animation: 'zoomIn 0.8s ease forwards',
+            mx: { xs: 0, md: 'auto' },
+            maxWidth: { xs: '100%', md: 900 }
           }}
         >
+          {/* Görsel Alanı - Tam Yuvarlatılmış ve Gölgeyle */}
           <Box
             sx={{
               flex: 1,
@@ -70,10 +73,11 @@ function Login() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              p: 4,
+              p: { xs: 2, sm: 4 },
               position: 'relative',
-              overflow: 'hidden',
-              gap: 2
+              minHeight: { xs: 180, sm: 'auto' },
+              gap: 2,
+              width: { xs: '100%', md: 'unset' },
             }}
           >
             <Box
@@ -87,15 +91,16 @@ function Login() {
                 animation: 'slideBar 3s ease-in-out infinite',
               }}
             />
+            {/* Yuvarlatılmış köşeler ve gölge */}
             <Box sx={{ position: 'relative', width: '100%', maxWidth: 500 }}>
               <img
                 src={LoginImage}
                 alt="Login"
                 style={{
                   width: '100%',
-                  borderRadius: 24,
+                  borderRadius: 55,
                   objectFit: 'cover',
-                  boxShadow: '0 33px 40px rgba(0,0,0,0.99)',
+                  boxShadow: '0 33px 40px rgba(0,0,0,0.5)',
                   zIndex: 1
                 }}
               />
@@ -104,46 +109,66 @@ function Login() {
                 alt="Core Optical Logo"
                 style={{
                   position: 'absolute',
-                  top: 16,
-                  left: 16,
-                  width: 64,
-                  height: 64,
+                  top: 18,
+                  left: 18,
+                  width: 54,
+                  height: 54,
                   borderRadius: '50%',
                   backgroundColor: 'transparent',
-                  padding: 5,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                  padding: 3,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.20)',
                   zIndex: 2
                 }}
               />
             </Box>
           </Box>
 
+          {/* Form Alanı */}
           <Box
             component="form"
             onSubmit={handleSubmit}
             sx={{
               flex: 1,
-              p: { xs: 3, sm: 5 },
+              p: { xs: 2, sm: 5 },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               animation: 'fadeInUp 1.5s ease',
+              minWidth: { xs: '100%', md: 400 }
             }}
           >
-            <Typography variant="h4" color="primary" fontWeight="bold" align="center" gutterBottom>
-              🕶️ Spotlar Gözlüğünü Parlatıyor, Perde Görüşe Açılıyor!
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{
+                fontWeight: 700,
+                color: theme.palette.mode === 'light'
+                  ? theme.palette.primary.dark
+                  : '#fff',
+                fontSize: { xs: '1.8rem', sm: '2.3rem' },
+                mb: 1.5,
+                letterSpacing: 0.2
+              }}
+              gutterBottom
+            >
+              Core Optical'a Hoş Geldiniz
             </Typography>
 
             <Typography
-              variant="h3"
+              variant="subtitle1"
               align="center"
-              gutterBottom
               sx={{
-                fontWeight: 'bold',
-                color: theme.palette.mode === 'light' ? theme.palette.primary.dark : '#fff',
+                color: theme.palette.text.secondary,
+                fontWeight: 500,
+                fontSize: { xs: '1.07rem', sm: '1.19rem' },
+                mb: 3,
+                lineHeight: 1.5
               }}
             >
-              Core Optical Sahnesine Hoş Geldin
+              <span style={{ color: theme.palette.primary.main, fontWeight: 600 }}>
+                Dijital sahneniz burada başlıyor.
+              </span>{' '}
+              Kullanıcı dostu ve güvenli ERP sistemiyle işinizi geleceğe taşıyın.
             </Typography>
 
             <TextField
@@ -153,7 +178,13 @@ function Login() {
               onChange={handleChange}
               fullWidth
               required
-              sx={{ my: 2, fontWeight: 'medium' }}
+              sx={{
+                my: 1.2,
+                fontWeight: 'medium',
+                fontSize: { xs: '0.95rem', sm: '1rem' }
+              }}
+              size="medium"
+              autoComplete="username"
             />
             <TextField
               label="Parolanız"
@@ -163,7 +194,13 @@ function Login() {
               onChange={handleChange}
               fullWidth
               required
-              sx={{ mb: 2, fontWeight: 'medium' }}
+              sx={{
+                mb: 1.2,
+                fontWeight: 'medium',
+                fontSize: { xs: '0.95rem', sm: '1rem' }
+              }}
+              size="medium"
+              autoComplete="current-password"
             />
 
             <FormControlLabel
@@ -172,10 +209,15 @@ function Login() {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   color="primary"
+                  size="small"
                 />
               }
-              label={<Typography variant="body2">Beni hatırla (ışıklar hiç sönmesin!)</Typography>}
-              sx={{ mb: 2 }}
+              label={
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.92rem', sm: '1rem' } }}>
+                  Beni hatırla
+                </Typography>
+              }
+              sx={{ mb: 1.5 }}
             />
 
             <Button
@@ -183,31 +225,33 @@ function Login() {
               variant="contained"
               fullWidth
               sx={{
-                py: 1.6,
-                fontSize: '1.1rem',
+                py: { xs: 1.1, sm: 1.6 },
+                fontSize: { xs: '1rem', sm: '1.1rem' },
                 fontWeight: 'bold',
                 letterSpacing: 0.5,
                 backgroundColor: theme.palette.primary.main,
                 '&:hover': {
                   backgroundColor: theme.palette.primary.dark,
                 },
+                mb: 2
               }}
             >
-              Şimdi Sahnene Çık 🚀
+              Giriş Yap
             </Button>
 
-            <Box textAlign="center" mt={3}>
-              <Link href="#" underline="hover" color="primary">
-                Şifremi unuttum / sıfırla
+            <Box textAlign="center" mt={2}>
+              <Link href="#" underline="hover" color="primary" sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}>
+                Şifremi mi unuttum?
               </Link>
-              <Typography variant="caption" display="block" mt={1} color="text.secondary">
-                Şifreni unuttuysan ben mi öğreteyim? 🙃
+              <Typography variant="caption" display="block" mt={0.7} color="text.secondary" sx={{
+                fontSize: { xs: '0.86rem', sm: '0.92rem' }
+              }}>
+                Şifrenizi mi unuttunuz? Hiç sorun değil, hemen sıfırlayın!
               </Typography>
             </Box>
           </Box>
         </Paper>
       </Container>
-
       <style>
         {`
           @keyframes fadeIn {
