@@ -52,6 +52,16 @@ const menuItems = [
         path: '/branchs',
         icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
       },
+      {
+        text: 'Stok Kategorileri',
+        path: '/stockCategory',  // <---- GÜNCELLEDİK
+        icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
+      },
+      {
+        text: 'Stok Grupları',
+        path: '/stockGroup',  // <---- GÜNCELLEDİK
+        icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
+      },
     ],
   },
   {
@@ -87,24 +97,19 @@ export default function SidebarLayout({
   const location = useLocation();
   const theme = useTheme();
 
-  // MEDİA QUERY: Mobil mi?
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  // Arama, menü açık/kapalı
   const [search, setSearch] = useState('');
   const [openMenus, setOpenMenus] = useState({});
   const didAutoExpand = useRef(false);
 
-  // Drawer genişliği
   const drawerWidth = drawerOpen ? expandedDrawerWidth : collapsedDrawerWidth;
 
   const filteredMenuItems = useMemo(() => filterMenu(menuItems, search), [search]);
 
-  // Aktif parent menu expand
   useEffect(() => {
     if (didAutoExpand.current) return;
     menuItems.forEach(item => {
@@ -123,7 +128,6 @@ export default function SidebarLayout({
     setOpenMenus(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Sidebar Drawer Component
   const drawer = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Toolbar
@@ -450,7 +454,7 @@ export default function SidebarLayout({
             width: '100%',
             minHeight: '100vh',
             p: { xs: 1, sm: 3 },
-            mt: { xs: 7, sm: 0 } // Mobilde AppBar altında boşluk bırak
+            mt: { xs: 7, sm: 0 }
           }}
         >
           <Toolbar sx={{ display: { xs: 'none', sm: 'block' } }} />

@@ -1,5 +1,3 @@
-// src/App.js
-
 import { useEffect, useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,54 +11,42 @@ import Me from './pages/Me';
 import BranchListPage from './pages/BranchListPage';
 import UserListPage from './pages/UserListPage';
 import RoleListPage from './pages/RoleListPage';
+import StockCategoryListPage from './pages/StockCategoryListPage';
+import StockGroupListPage from './pages/StockGroupListPage';
+
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
-  // Sayfa ilk yüklendiğinde localStorage'dan tema bilgisi alınır
   useEffect(() => {
     const stored = localStorage.getItem('theme');
-    if (stored === 'dark') {
-      setDarkMode(true);
-    }
+    if (stored === 'dark') setDarkMode(true);
   }, []);
 
-  // Tema değiştiğinde localStorage'a yazılır
   useEffect(() => {
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
-  // 🚫 Klavye kısayolları ve sağ tıklama engelleme
+  // Kısayol & sağ tık engelleme
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ctrl+S engelleme (sayfa kaydetmeyi önler)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      if ((e.ctrlKey || e.metaKey) && ['s', 'p'].includes(e.key.toLowerCase())) {
         e.preventDefault();
-        console.log('CTRL+S engellendi.');
-      }
-      // Ctrl+P engelleme (yazdırmayı önler)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
-        e.preventDefault();
-        console.log('CTRL+P engellendi.');
+        console.log(`CTRL+${e.key.toUpperCase()} engellendi.`);
       }
     };
-
     const handleContextMenu = (e) => {
-      // Sağ tıklama menüsünü engelle
       e.preventDefault();
       console.log('Sağ tıklama engellendi.');
     };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', handleContextMenu);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', handleContextMenu);
     };
   }, []);
 
-  // Tema nesnesini oluştur
   const theme = getTheme(darkMode ? 'dark' : 'light');
 
   return (
@@ -71,37 +57,15 @@ function App() {
           <Route path="/" element={<Welcome />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/me"
-            element={<Me darkMode={darkMode} setDarkMode={setDarkMode} />}
-          />
-          <Route
-            path="/branchs"
-            element={
-              <BranchListPage
-                darkMode={darkMode}
-                setDarkMode={setDarkMode}
-              />
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <UserListPage
-                darkMode={darkMode}
-                setDarkMode={setDarkMode}
-              />
-            }
-          />
-          <Route
-            path="/roles"
-            element={
-              <RoleListPage
-                darkMode={darkMode}
-                setDarkMode={setDarkMode}
-              />
-            }
-          />
+          <Route path="/me" element={<Me darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/branchs" element={<BranchListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/users" element={<UserListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/roles" element={<RoleListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/stockCategory" element={<StockCategoryListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/stockGroup" element={<StockGroupListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+
+          
+
         </Routes>
       </Router>
     </ThemeProvider>

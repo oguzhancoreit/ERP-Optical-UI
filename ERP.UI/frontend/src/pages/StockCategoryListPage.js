@@ -1,12 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import SidebarLayout from '../layouts/SidebarLayout';
-import BranchFormModal from '../components/BranchFormModal';
-import { getBranchesPaged, createBranch, updateBranch, deleteBranch } from '../api/branch-api';
+import StockCategoryFormModal from '../components/StockCategoryFormModal';
+import {
+  getStockCategoryPaged, // doğru isimle import et
+  createStockCategory,
+  updateStockCategory,
+  deleteStockCategory
+} from '../api/stockCategory-api';
 import BaseListPage from '../components/shared/BaseListPage';
 
-export default function BranchListPage({ darkMode, setDarkMode }) {
-  const [branches, setBranches] = useState([]);
-  const [selectedBranch, setSelectedBranch] = useState(null);
+export default function StockCategoryListPage({ darkMode, setDarkMode }) {
+  const [rows, setRows] = useState([]);
+  const [selected, setSelected] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -14,70 +19,66 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Veri çekme fonksiyonu
-  const fetchBranches = useCallback(async () => {
+  // Verileri çek
+  const fetchRows = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getBranchesPaged(page + 1, pageSize, search);
-      setBranches(res.items || []);
+      const res = await getStockCategoryPaged(page + 1, pageSize, search);
+      setRows(res.items || []);
       setRowCount(res.totalCount || 0);
     } catch {
-      // Burada merkezi bir Snackbar kullanıyorsan alert kaldırılabilir.
-      alert('Şubeler yüklenemedi.');
+      alert('Stock Category verileri yüklenemedi.');
     }
     setLoading(false);
   }, [page, pageSize, search]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchBranches();
+      fetchRows();
     }, 400);
     return () => clearTimeout(delayDebounce);
-  }, [fetchBranches]);
+  }, [fetchRows]);
 
-  // Kaydetme (yeni & güncelle)
+  // Kaydet (yeni/güncelle)
   const handleSave = async (formData) => {
     try {
-      if (selectedBranch?.id) {
-        await updateBranch(selectedBranch.id, formData);
+      if (selected?.id) {
+        await updateStockCategory(selected.id, formData);
       } else {
-        await createBranch(formData);
-        setPage(0); // yeni kayıt varsa başa dön
+        await createStockCategory(formData);
+        setPage(0);
       }
       setModalOpen(false);
-      setSelectedBranch(null);
-      fetchBranches();
+      setSelected(null);
+      fetchRows();
     } catch {
-      // Merkezî hata mesajın varsa burayı temiz bırakabilirsin.
       alert('İşlem sırasında hata oluştu.');
     }
   };
 
+  // SİLME işlemi -- SADECE id parametresi bekler!
   const handleDelete = async (id) => {
-    await deleteBranch(id);
-    fetchBranches();
+    await deleteStockCategory(id);
+    fetchRows();
   };
 
-  const handleCopy = (branch) => {
+  const handleCopy = (row) => {
     const copy = {
-      ...branch,
+      ...row,
       id: undefined,
-      name: `${branch.name} (Kopya)`,
-      //code: `${branch.code}-copy`,
+      name: `${row.name || ''} (Kopya)`
     };
-    setSelectedBranch(copy);
+    setSelected(copy);
     setModalOpen(true);
   };
 
-  const handleEdit = (branch) => {
-    setSelectedBranch(branch);
+  const handleEdit = (row) => {
+    setSelected(row);
     setModalOpen(true);
   };
 
   const columns = [
-    { field: 'code', headerName: 'Kod', flex: 1 },
-    { field: 'name', headerName: 'Ad', flex: 1 },
-    { field: 'address', headerName: 'Adres', flex: 2 },
+    { field: 'name', headerName: 'Kategori Adı', flex: 1 },
     {
       field: 'createdAt',
       headerName: 'Oluşturulma',
@@ -86,16 +87,13 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
       renderCell: (params) => {
         const rawDate = params.row?.createdAt || params.row?.CreatedAt;
         if (!rawDate) return '-';
-
         const d = new Date(rawDate);
         if (isNaN(d.getTime())) return 'Invalid Date';
-
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
-
         return `${year}-${month}-${day} ${hours}:${minutes}`;
       },
     }
@@ -103,18 +101,19 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
 
   return (
     <SidebarLayout darkMode={darkMode} setDarkMode={setDarkMode}>
+      {/* <pre>{JSON.stringify(rows, null, 2)}</pre>  // debug için açabilirsin */}
       <BaseListPage
-        title="Şubeler"
+        title="Stok Kategorileri"
         columns={columns}
-        rows={branches}
+        rows={rows}
         rowCount={rowCount}
         loading={loading}
         onAdd={() => {
-          setSelectedBranch(null);
+          setSelected(null);
           setModalOpen(true);
         }}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={handleDelete}  
         onCopy={handleCopy}
         search={search}
         onSearch={setSearch}
@@ -123,15 +122,14 @@ export default function BranchListPage({ darkMode, setDarkMode }) {
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
       />
-
-      <BranchFormModal
+      <StockCategoryFormModal
         open={modalOpen}
         onClose={() => {
           setModalOpen(false);
-          setSelectedBranch(null);
+          setSelected(null);
         }}
         onSave={handleSave}
-        initialData={selectedBranch}
+        initialData={selected}
       />
     </SidebarLayout>
   );
