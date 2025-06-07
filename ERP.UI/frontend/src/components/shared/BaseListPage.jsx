@@ -18,6 +18,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 import ConfirmDialog from './ConfirmDialog';
+import Checkbox from '@mui/material/Checkbox';
 
 function DefaultNoRowsOverlay({ onAdd }) {
   return (
@@ -88,6 +89,30 @@ export default function BaseListPage({
     saveAs(file, `${title || 'Tablo'}.xlsx`);
   };
 
+  // Boolean (checkbox) için kolonları wrap'le
+  const boolWrappedColumns = useMemo(() => {
+    return columns.map(col => {
+      if (col.type === 'boolean') {
+        return {
+          ...col,
+          align: 'center',
+          headerAlign: 'center',
+          sortable: col.sortable !== false,
+          renderCell: (params) => (
+            <Checkbox
+              checked={Boolean(params.value)}
+              disabled
+              color="primary"
+              size="small"
+              inputProps={{ 'aria-label': 'boolean value' }}
+            />
+          )
+        };
+      }
+      return col;
+    });
+  }, [columns]);
+
   const extendedColumns = useMemo(() => {
     const actionsCol = (onEdit || onCopy || onDelete || extraActions) ? [{
       field: 'actions',
@@ -105,14 +130,14 @@ export default function BaseListPage({
           )}
           {onCopy && (
             <Tooltip title="Kopyala">
-              <IconButton color="success" onClick={() => onCopy(params.row)}>
+              <IconButton color="primary" onClick={() => onCopy(params.row)}>
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           )}
           {onDelete && (
             <Tooltip title="Sil">
-              <IconButton color="error" onClick={() => handleDeleteRequest(params.row.id)}>
+              <IconButton color="primary" onClick={() => handleDeleteRequest(params.row.id)}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -121,8 +146,8 @@ export default function BaseListPage({
         </Stack>
       )
     }] : [];
-    return [...columns, ...actionsCol];
-  }, [columns, onEdit, onCopy, onDelete, extraActions]);
+    return [...boolWrappedColumns, ...actionsCol];
+  }, [boolWrappedColumns, onEdit, onCopy, onDelete, extraActions]);
 
   // Yeni ekleme: otomatik focus
   const handleAdd = () => {
@@ -151,7 +176,7 @@ export default function BaseListPage({
         height: { xs: 'auto', md: 'calc(100vh - 120px)' },
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: 'background.default',
         p: { xs: 1, sm: 2, md: 3 }
       }}
     >
@@ -172,7 +197,7 @@ export default function BaseListPage({
             </Button>
           )}
           <Tooltip title="Excel'e Aktar">
-            <IconButton color="success" size={isMobile ? "medium" : "large"} onClick={handleExportExcel}>
+            <IconButton color="primary" size={isMobile ? "medium" : "large"} onClick={handleExportExcel}>
               <FileDownloadIcon />
             </IconButton>
           </Tooltip>
@@ -197,21 +222,18 @@ export default function BaseListPage({
           }}
           sx={{
             mb: 2,
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: 1,
-            fontSize: { xs: '1rem', sm: '1.1rem' }
           }}
         />
       )}
 
       <Paper
-        elevation={2}
+        elevation={0}
         sx={{
           flex: 1,
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: 'background.paper',
           minHeight: 240,
-          p: isMobile ? 0 : 1,
-          borderRadius: { xs: 2, sm: 3, md: 3 },
+          p: 0,
+          borderRadius: 0,
           width: '100%',
           overflowX: 'auto'
         }}
@@ -237,48 +259,6 @@ export default function BaseListPage({
               }}
               getRowId={getRowId}
               disableRowSelectionOnClick
-
-              // FOCUS HANDLING
-              onRowClick={(params) => setFocusRowId(params.id)}
-              onCellClick={(params) => setFocusRowId(params.id)}
-              onRowEditStop={(params) => setFocusRowId(params.id)}
-              onRowEditCommit={(id) => setFocusRowId(id)}
-              getRowClassName={(params) =>
-                focusRowId === params.id ? 'MuiDataGrid-row--focused' : ''
-              }
-              sx={{
-                border: 'none',
-                fontSize: { xs: '0.95rem', sm: '1.05rem' },
-                '& .MuiDataGrid-columnHeaders': {
-                  backgroundColor: theme.palette.background.paper,
-                  color: theme.palette.text.primary,
-                  fontWeight: 'bold',
-                  fontSize: { xs: 15, sm: 18 },
-                  minHeight: { xs: 38, sm: 60 },
-                  maxHeight: { xs: 38, sm: 60 },
-                  lineHeight: { xs: '38px', sm: '60px' },
-                  '& .MuiDataGrid-columnHeaderTitle': {
-                    fontWeight: 700,
-                    paddingY: 2,
-                  },
-                },
-                '& .MuiDataGrid-row:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                  cursor: 'pointer',
-                },
-                '& .MuiDataGrid-row--focused': {
-                  backgroundColor: theme.palette.action.selected,
-                  fontWeight: 600,
-                },
-                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
-                  outline: 'none !important',
-                  border: 'none !important',
-                },
-                '& .MuiDataGrid-row:focus, & .MuiDataGrid-row:focus-within': {
-                  outline: 'none !important',
-                  border: 'none !important',
-                },
-              }}
               autoHeight={isMobile}
             />
           )}

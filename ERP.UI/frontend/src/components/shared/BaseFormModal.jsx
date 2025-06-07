@@ -15,12 +15,10 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
-  FormControlLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useMemo, useEffect } from 'react';
 import { useFormik } from 'formik';
-import { motion } from 'framer-motion';
 import axios from '../../services/axios-instance';
 
 const stripHtml = (str) => str.replace(/<\/?[^>]+(>|$)/g, '');
@@ -109,6 +107,7 @@ export default function BaseFormModal({
 
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
+  // Tamamen sade, Material UI orijinal: Hiç ekstra stil yok!
   const renderField = (field) => {
     const {
       name,
@@ -126,123 +125,129 @@ export default function BaseFormModal({
     const error = formik.touched[name] && Boolean(formik.errors[name]);
     const helperText = formik.touched[name] && formik.errors[name];
     const options = optionsMap[name] || [];
-
     const autoCompleteValue =
       field.autoComplete ||
       (name.toLowerCase().includes('password') || name.toLowerCase().includes('email') ? 'new-password' : 'off');
+    const inputId = `form-modal-${name}`;
 
-    // Checkbox için özel component!
+    // Checkbox
     if (type === 'checkbox') {
       return (
-        <FormControlLabel
-          key={name}
-          control={
-            <Checkbox
-              checked={!!value}
-              onChange={(e) => formik.setFieldValue(name, e.target.checked)}
-              name={name}
-              color="primary"
-              disabled={externalLoading || loading}
-            />
-          }
-          label={label + (required ? ' *' : '')}
-          sx={{ my: isMobile ? 0.5 : 1 }}
-        />
+        <Box key={name} mb={0.5} sx={{ display: 'flex', flexDirection: 'column' }}>
+          <label htmlFor={inputId} style={{
+            display: 'block',
+            marginBottom: 2,
+            fontWeight: 500,
+            fontSize: isMobile ? '0.96rem' : '1rem',
+            cursor: 'pointer'
+          }}>
+            {label}{required ? ' *' : ''}
+          </label>
+          <Checkbox
+            id={inputId}
+            checked={!!value}
+            onChange={(e) => formik.setFieldValue(name, e.target.checked)}
+            name={name}
+            color="primary"
+            disabled={externalLoading || loading}
+            size="small"
+          />
+        </Box>
       );
     }
 
+    // Multi select
     if (type === 'select-multi') {
       return (
-        <TextField
-          key={name}
-          select
-          fullWidth
-          label={label}
-          name={name}
-          value={value}
-          onChange={(e) => formik.setFieldValue(name, e.target.value)}
-          onBlur={formik.handleBlur}
-          margin="normal"
-          error={error}
-          helperText={helperText}
-          SelectProps={{
-            multiple: true,
-            renderValue: (selected) => {
-              const selectedItems = options.filter(opt => selected.includes(opt[optionValue]));
-              return selectedItems.map(opt => opt[optionLabel]).join(', ');
-            }
-          }}
-          size={isMobile ? "small" : "medium"}
-          sx={{
-            fontSize: isMobile ? '0.96rem' : undefined,
-            mb: isMobile ? 1 : 2,
-          }}
-        >
-          {options.map((opt) => (
-            <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
-              <Checkbox checked={value.includes(opt[optionValue])} size="small" />
-              <ListItemText primary={opt[optionLabel]} />
-            </MenuItem>
-          ))}
-        </TextField>
+        <Box key={name} mb={0.5}>
+          <TextField
+            id={inputId}
+            select
+            fullWidth
+            label={label + (required ? ' *' : '')}
+            name={name}
+            value={value}
+            onChange={(e) => formik.setFieldValue(name, e.target.value)}
+            onBlur={formik.handleBlur}
+            margin="dense"
+            error={error}
+            helperText={helperText}
+            SelectProps={{
+              multiple: true,
+              renderValue: (selected) => {
+                const selectedItems = options.filter(opt => selected.includes(opt[optionValue]));
+                return selectedItems.map(opt => opt[optionLabel]).join(', ');
+              }
+            }}
+            size="small"
+            autoComplete={autoCompleteValue}
+            inputProps={{ maxLength }}
+          >
+            {options.map((opt) => (
+              <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
+                <Checkbox checked={value.includes(opt[optionValue])} size="small" />
+                <ListItemText primary={opt[optionLabel]} />
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
       );
     }
 
+    // Tekli select
     if (type === 'select') {
       return (
+        <Box key={name} mb={0.5}>
+          <TextField
+            id={inputId}
+            select
+            fullWidth
+            label={label + (required ? ' *' : '')}
+            name={name}
+            value={value}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            margin="dense"
+            error={error}
+            helperText={helperText}
+            autoComplete={autoCompleteValue}
+            size="small"
+            inputProps={{ maxLength }}
+          >
+            {options.map((opt) => (
+              <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
+                {opt[optionLabel]}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
+      );
+    }
+
+    // Normal text input
+    return (
+      <Box key={name} mb={0.5}>
         <TextField
-          key={name}
-          select
+          id={inputId}
           fullWidth
-          label={label}
+          type={type}
           name={name}
+          label={label + (required ? ' *' : '')}
           value={value}
+          required={required}
+          multiline={multiline}
+          rows={rows}
+          inputProps={{ maxLength }}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
-          margin="normal"
+          margin="dense"
           error={error}
           helperText={helperText}
           autoComplete={autoCompleteValue}
-          size={isMobile ? "small" : "medium"}
-          sx={{
-            fontSize: isMobile ? '0.96rem' : undefined,
-            mb: isMobile ? 1 : 2,
-          }}
-        >
-          {options.map((opt) => (
-            <MenuItem key={opt[optionValue]} value={opt[optionValue]}>
-              {opt[optionLabel]}
-            </MenuItem>
-          ))}
-        </TextField>
-      );
-    }
-
-    return (
-      <TextField
-        key={name}
-        fullWidth
-        type={type}
-        name={name}
-        label={label}
-        value={value}
-        required={required}
-        multiline={multiline}
-        rows={rows}
-        inputProps={{ maxLength }}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        margin="normal"
-        error={error}
-        helperText={helperText}
-        autoComplete={autoCompleteValue}
-        disabled={externalLoading || loading}
-        size={isMobile ? "small" : "medium"}
-        sx={{
-          fontSize: isMobile ? '0.96rem' : undefined,
-          mb: isMobile ? 1 : 2,
-        }}
-      />
+          disabled={externalLoading || loading}
+          size="small"
+        />
+      </Box>
     );
   };
 
@@ -255,12 +260,6 @@ export default function BaseFormModal({
         maxWidth="sm"
         fullScreen={isMobile}
         disableEscapeKeyDown
-        PaperProps={{
-          sx: {
-            m: { xs: 0, sm: 3 },
-            borderRadius: { xs: 0, sm: 3 },
-          }
-        }}
       >
         <form
           key={JSON.stringify(initialValues)}
@@ -283,25 +282,6 @@ export default function BaseFormModal({
                 position: 'absolute',
                 right: 8,
                 top: 8,
-                backgroundColor: '#212121',
-                color: '#fff',
-                border: '2px solid #FF1744',
-                borderRadius: '4px',
-                width: 32,
-                height: 32,
-                minWidth: 0,
-                minHeight: 0,
-                boxShadow: 'none',
-                padding: 0,
-                fontWeight: 'bold',
-                '&:hover': {
-                  backgroundColor: '#FF1744',
-                  color: '#fff',
-                  border: '2px solid #212121',
-                  boxShadow: 'none',
-                },
-                outline: '1px solid #fff',
-                outlineOffset: '-3px',
               }}
             >
               <CloseIcon fontSize="small" />
@@ -316,15 +296,9 @@ export default function BaseFormModal({
               maxHeight: isMobile ? 'unset' : '60vh',
             }}
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
-              <Box display="flex" flexDirection="column" gap={isMobile ? 1 : 2}>
-                {fields.map(renderField)}
-              </Box>
-            </motion.div>
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              {fields.map(renderField)}
+            </Box>
           </DialogContent>
 
           <DialogActions
