@@ -12,18 +12,14 @@ const instance = axios.create({
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   const dbName = localStorage.getItem('dbName');
-
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
   if (dbName) {
     config.headers['DbName'] = dbName;
   }
-
   return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+}, (error) => Promise.reject(error));
 
 // Opsiyonel: 401 hatalarında log (ya da yönlendirme eklenebilir)
 instance.interceptors.response.use(

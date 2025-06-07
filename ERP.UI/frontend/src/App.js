@@ -13,7 +13,8 @@ import UserListPage from './pages/UserListPage';
 import RoleListPage from './pages/RoleListPage';
 import StockCategoryListPage from './pages/StockCategoryListPage';
 import StockGroupListPage from './pages/StockGroupListPage';
-
+import UnitGroupListPage from './pages/UnitGroupListPage';
+import UnitListPage from './pages/UnitListPage';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -63,8 +64,8 @@ function App() {
           <Route path="/roles" element={<RoleListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
           <Route path="/stockCategory" element={<StockCategoryListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
           <Route path="/stockGroup" element={<StockGroupListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
-
-          
+          <Route path="/unitGroup" element={<UnitGroupListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
+          <Route path="/unit" element={<UnitListPage darkMode={darkMode} setDarkMode={setDarkMode} />} />
 
         </Routes>
       </Router>

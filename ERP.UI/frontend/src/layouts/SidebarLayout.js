@@ -62,6 +62,16 @@ const menuItems = [
         path: '/stockGroup',  // <---- GÜNCELLEDİK
         icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
       },
+      {
+        text: 'Birim Grupları',
+        path: '/unitGroup',  // <---- GÜNCELLEDİK
+        icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
+      },
+      {
+        text: 'Birimler',
+        path: '/unit',  // <---- GÜNCELLEDİK
+        icon: <BusinessIcon sx={{ color: '#e91e63', fontSize: 18 }} />,
+      },
     ],
   },
   {

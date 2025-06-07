@@ -1,6 +1,6 @@
 import { createCrudApi } from './helpers/createCrudApi';
 
-const BASE_URL = '/branches';
+const BASE_URL = '/branches';   // Backend endpoint adın buysa doğru!
 const branchApi = createCrudApi(BASE_URL, 'BRANCH');
 
 export const getBranchesPaged = branchApi.getPaged;
