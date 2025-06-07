@@ -15,6 +15,7 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
+  FormControlLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useMemo, useEffect } from 'react';
@@ -42,9 +43,16 @@ export default function BaseFormModal({
   const [optionsMap, setOptionsMap] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  // Checkbox için default değer ayarlaması
   const initialValues = useMemo(() => {
     return fields.reduce((acc, field) => {
-      acc[field.name] = initialData?.[field.name] ?? (field.type === 'select-multi' ? [] : '');
+      if (field.type === 'checkbox') {
+        acc[field.name] = typeof initialData?.[field.name] === 'boolean' ? initialData[field.name] : false;
+      } else if (field.type === 'select-multi') {
+        acc[field.name] = initialData?.[field.name] ?? [];
+      } else {
+        acc[field.name] = initialData?.[field.name] ?? '';
+      }
       return acc;
     }, {});
   }, [initialData, fields]);
@@ -122,6 +130,26 @@ export default function BaseFormModal({
     const autoCompleteValue =
       field.autoComplete ||
       (name.toLowerCase().includes('password') || name.toLowerCase().includes('email') ? 'new-password' : 'off');
+
+    // Checkbox için özel component!
+    if (type === 'checkbox') {
+      return (
+        <FormControlLabel
+          key={name}
+          control={
+            <Checkbox
+              checked={!!value}
+              onChange={(e) => formik.setFieldValue(name, e.target.checked)}
+              name={name}
+              color="primary"
+              disabled={externalLoading || loading}
+            />
+          }
+          label={label + (required ? ' *' : '')}
+          sx={{ my: isMobile ? 0.5 : 1 }}
+        />
+      );
+    }
 
     if (type === 'select-multi') {
       return (

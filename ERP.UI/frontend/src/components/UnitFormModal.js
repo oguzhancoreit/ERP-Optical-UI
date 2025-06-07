@@ -75,7 +75,8 @@ export default function UnitFormModal({ open, onClose, onSave, initialData }) {
         }
       ]}
       validationSchema={Yup.object({
-        code:Yup.string()
+        code:
+                    Yup.string()
               .required('Code gereklidir.')
               .max(100, 'Code en fazla 100 karakter olmalı.')
 ,
@@ -90,7 +91,6 @@ export default function UnitFormModal({ open, onClose, onSave, initialData }) {
 ,
         default:
                     Yup.boolean()
-              .oneOf([true], 'Default gereklidir.')
 ,
         factor:
                     Yup.string()
